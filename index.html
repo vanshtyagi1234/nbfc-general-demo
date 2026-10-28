@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>QuickLend — Privacy-First Personal Loans</title>
+  <title data-brand-title="{shortName} — Privacy-First Personal Loans" data-brand-title-configurable>QuickLend — Privacy-First Personal Loans</title>
   <!-- Optional runtime config; absent in dev (inline script seeds an empty default so the
        inline app code falls back to localhost). Copy config/env.example.js to config/env.js. -->
   <script>window.DEMO_CONFIG = window.DEMO_CONFIG || {};</script>
   <script src="./config/env.js"></script>
+  <script src="./config/brand.js"></script>
+  <script src="./js/brand.js"></script>
   <script src="./js/sdk-loader.js" data-load="consent cookie-banner"></script>
   <style>
     * {
@@ -17,23 +19,28 @@
       box-sizing: border-box;
     }
 
+    /* Brand colours come from js/brand.js (--brand-*); the fallbacks are the original demo's. */
     :root {
-      --navy: #1A2B5F;
-      --blue: #2563EB;
-      --teal: #0EA5E9;
+      --navy: var(--brand-secondary, #1A2B5F);
+      --navy-deep: var(--brand-secondary-deep, #0f1e42);
+      --navy-ring: var(--brand-secondary-ring, #243060);
+      --blue: var(--brand-primary, #2563EB);
+      --blue-hover: var(--brand-primary-hover, #1d4ed8);
+      --teal: var(--brand-accent, #0EA5E9);
+      --teal-rgb: var(--brand-accent-rgb, 14, 165, 233);
       --green: #16A34A;
       --gdk: #15803D;
       --orange: #EA580C;
       --grey: #6B7280;
-      --bg: #F1F5FE;
-      --border: #E0E7FF;
-      --text-dark: #0F1E42;
+      --bg: var(--brand-tint-bg, #F1F5FE);
+      --border: var(--brand-tint-border, #E0E7FF);
+      --text-dark: var(--brand-secondary-deep, #0F1E42);
       --text-muted: #64748B;
     }
 
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(165deg, #0f1e42, #1A2B5F);
+      background: linear-gradient(165deg, var(--navy-deep), var(--navy));
       min-height: 100vh;
       overflow: hidden;
       display: flex;
@@ -103,7 +110,7 @@
       background: var(--teal);
       border-color: var(--teal);
       color: white;
-      box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+      box-shadow: 0 0 12px rgba(var(--teal-rgb), 0.6);
     }
 
     .jstep.active .jlbl {
@@ -117,7 +124,7 @@
       height: 580px;
       background: #F9FAFB;
       border-radius: 36px;
-      box-shadow: 0 0 0 5px #0f1e42, 0 0 0 7px #243060, 0 20px 50px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 0 0 5px var(--navy-deep), 0 0 0 7px var(--navy-ring), 0 20px 50px rgba(0, 0, 0, 0.8);
       position: relative;
       overflow: hidden;
       display: flex;
@@ -131,7 +138,7 @@
       transform: translateX(-50%);
       width: 72px;
       height: 18px;
-      background: #0f1e42;
+      background: var(--navy-deep);
       border-radius: 0 0 11px 11px;
       z-index: 30;
     }
@@ -220,7 +227,7 @@
     input:focus {
       outline: none;
       border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+      box-shadow: 0 0 0 3px rgba(var(--teal-rgb), 0.1);
     }
 
     input[type="range"] {
@@ -244,7 +251,7 @@
     }
 
     .btn:hover {
-      background: #1d4ed8;
+      background: var(--blue-hover);
     }
 
     .btn:disabled {
@@ -283,7 +290,7 @@
 
     .otp-digit:focus {
       border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+      box-shadow: 0 0 0 3px rgba(var(--teal-rgb), 0.1);
       outline: none;
     }
 
@@ -432,7 +439,7 @@
 
     .plan-card:hover {
       border-color: var(--teal);
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+      box-shadow: 0 4px 12px rgba(var(--teal-rgb), 0.1);
     }
 
     .plan-name {
@@ -499,6 +506,15 @@
       margin: 0 auto 12px;
     }
 
+    [data-brand-logo] {
+      display: flex;
+      justify-content: center;
+    }
+
+    .brand-logo-img {
+      object-fit: contain;
+    }
+
     /* Link */
     .link {
       color: var(--blue);
@@ -527,12 +543,12 @@
     }
 
     #screen::-webkit-scrollbar-thumb {
-      background: rgba(14, 165, 233, 0.3);
+      background: rgba(var(--teal-rgb), 0.3);
       border-radius: 2px;
     }
 
     #screen::-webkit-scrollbar-thumb:hover {
-      background: rgba(14, 165, 233, 0.5);
+      background: rgba(var(--teal-rgb), 0.5);
     }
   </style>
 </head>
@@ -543,7 +559,7 @@
       <div class="notch"></div>
       <div id="appbar">
         <button id="appbar-back">←</button>
-        <div id="appbar-title">QuickLend</div>
+        <div id="appbar-title"></div>
         <div style="width: 24px;"></div>
       </div>
       <div id="screen"></div>
@@ -633,12 +649,9 @@
       welcome() {
         return `
           <div class="screen-content">
-            <svg class="logo-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="48" height="48" rx="8" fill="#2563EB"/>
-              <text x="24" y="32" font-size="24" font-weight="700" fill="white" text-anchor="middle">Q</text>
-            </svg>
-            <h1 class="section-heading">QuickLend</h1>
-            <p class="section-desc">Your Personal Loan, Simplified</p>
+            <div data-brand-logo="logo-svg">${NbfcBrand.logoHtml("logo-svg")}</div>
+            <h1 class="section-heading" data-brand-text="shortName">${NbfcBrand.escape(NbfcBrand.get().shortName)}</h1>
+            <p class="section-desc" data-brand-text="tagline">${NbfcBrand.escape(NbfcBrand.get().tagline)}</p>
             <div class="card" style="margin: 20px 0;">
               <div style="text-align: center; margin-bottom: 12px;">
                 <div style="font-size: 28px; font-weight: 700; color: var(--navy);">₹ 2,50,000</div>
@@ -1078,8 +1091,9 @@
 
     function updateAppBar() {
       const backBtn = document.getElementById("appbar-back");
+      const brandName = NbfcBrand.get().shortName;
       const titles = {
-        welcome: "QuickLend",
+        welcome: brandName,
         age: "Get Started",
         register: "Create Account",
         otp: "Verify Phone",
@@ -1092,7 +1106,7 @@
         finish: "All Done"
       };
 
-      document.getElementById("appbar-title").textContent = titles[STATE.currentScreen] || "QuickLend";
+      document.getElementById("appbar-title").textContent = titles[STATE.currentScreen] || brandName;
 
       const canGoBack = ORDER.indexOf(STATE.currentScreen) > 0;
       if (canGoBack) {
@@ -1715,6 +1729,9 @@
     document.getElementById("restart-btn").addEventListener("click", restart);
 
     // ====== Init ======
+    // The org's branding arrives asynchronously; data-brand-* nodes refresh
+    // themselves, the app bar title is rebuilt here.
+    window.addEventListener("nbfc:brand", updateAppBar);
     goTo("welcome");
   </script>
 
