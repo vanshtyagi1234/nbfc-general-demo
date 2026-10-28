@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex, nofollow">
-    <title>e-Sahamati cookie banner — demo</title>
+    <title>Cookie banner — demo</title>
     <style>
       body {
         margin: 0;
@@ -65,7 +65,7 @@
   </head>
   <body>
     <header>
-      <h1>e-Sahamati cookie banner — demo</h1>
+      <h1>Cookie banner — demo</h1>
       <p style="margin: 4px 0 0; color: #64748b; font-size: 14px;">
         Reference host integration. Drop the <code>&lt;script&gt;</code> tag,
         the banner auto-fetches the org's config, and tag loaders gate on
@@ -88,18 +88,13 @@
       <div id="log" class="event-log">awaiting banner…</div>
 
       <h2>Snippet</h2>
-      <pre><code>&lt;script src="cookie-banner.iife.js"&gt;&lt;/script&gt;
+      <pre><code>&lt;script src="cookie-banner.min.js"&gt;&lt;/script&gt;
 &lt;es-cookie-banner
-  org-id="org-quicklend-001"
-  api-base="http://localhost:4000/api/v1"
+  org-id="<span id="snippet-org"></span>"
+  api-base="<span id="snippet-api"></span>"
 &gt;&lt;/es-cookie-banner&gt;</code></pre>
     </main>
 
-    <!--
-      Production: replace with the minified bundle served from your CDN, e.g.
-      <script src="https://cdn.example.com/cookie-banner.min.js"></script>
-      Demo path assumes a sibling copy of the dist bundle.
-    -->
     <!--
       FB-03 script-gating demo: these two scripts stay inert (type="text/plain")
       until the visitor consents to their category. Watch the "Gated scripts"
@@ -124,15 +119,19 @@
       <div id="gate-marketing">marketing: blocked</div>
     </div>
 
-    <script src="../../packages/cookie-banner-sdk/dist/cookie-banner.js"></script>
-    <es-cookie-banner
-      id="banner"
-      org-id="org-quicklend-001"
-      api-base="http://localhost:4000/api/v1"
-    ></es-cookie-banner>
+    <script>window.DEMO_CONFIG = window.DEMO_CONFIG || {};</script>
+    <script src="./config/env.js"></script>
+    <script src="./js/sdk-loader.js" data-load="cookie-banner"></script>
 
     <script>
-      const banner = document.getElementById("banner")
+      const cfg = window.DEMO_CONFIG || {}
+      const banner = document.createElement("es-cookie-banner")
+      banner.id = "banner"
+      banner.setAttribute("org-id", cfg.ORG_ID || "org-quicklend-001")
+      banner.setAttribute("api-base", cfg.API_BASE || "http://localhost:4000/api/v1")
+      document.body.appendChild(banner)
+      document.getElementById("snippet-org").textContent = banner.getAttribute("org-id")
+      document.getElementById("snippet-api").textContent = banner.getAttribute("api-base")
       const log = document.getElementById("log")
       function appendLog(line) {
         const ts = new Date().toISOString().slice(11, 19)

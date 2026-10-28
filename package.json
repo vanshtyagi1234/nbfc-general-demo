@@ -1,0 +1,11 @@
+{
+  "name": "nbfc-general-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Configurable NBFC loan journey demo on the e-Sahamati consent platform",
+  "scripts": {
+    "start": "npx http-server . -p 8000 -c-1 -o /index.html",
+    "start:dpo": "npx http-server . -p 8000 -c-1 -o /dpo.html",
+    "serve": "npx http-server . -p 8000 -c-1"
+  }
+}

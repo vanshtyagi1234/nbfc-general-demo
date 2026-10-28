@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>QuickLend Finance — Consent & Data Rights Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --ql-navy: #0F2557;
+      --ql-amber: #D97706;
+      --ql-slate: #F8FAFF;
+      --ql-dark: #1E1E1E;
+      --dpo-bg: #0F1C3F;
+      --dpo-border: #1E3A5F;
+      --success: #10B981;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --neutral-100: #F3F4F6;
+      --neutral-200: #E5E7EB;
+      --neutral-400: #9CA3AF;
+      --neutral-600: #4B5563;
+      --neutral-800: #1F2937;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--ql-slate);
+      color: var(--ql-dark);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+      padding: 20px;
+      min-height: 100vh;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 1024px) {
+      .container {
+        grid-template-columns: 1.5fr 1fr;
+        gap: 30px;
+      }
+    }
+
+    /* ─── Left Panel: User Journey ─── */
+    .left-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--neutral-200);
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      background: var(--ql-navy);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 24px;
+    }
+
+    .brand-text h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ql-navy);
+      margin: 0;
+    }
+
+    .brand-text p {
+      font-size: 13px;
+      color: var(--neutral-400);
+      margin: 4px 0 0 0;
+    }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .step {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--neutral-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neutral-600);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .step.active {
+      background: var(--ql-amber);
+      color: white;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+    }
+
+    .step.completed {
+      background: var(--success);
+      color: white;
+    }
+
+    .step:hover:not(.disabled) {
+      transform: scale(1.08);
+    }
+
+    /* Screen Content */
+    .screen {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .screen h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ql-navy);
+      margin-bottom: 12px;
+    }
+
+    .screen p {
+      color: var(--neutral-600);
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ql-dark);
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--neutral-200);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--ql-amber);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+    }
+
+    .form-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--ql-amber);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #B85D00;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--neutral-200);
+      color: var(--ql-dark);
+    }
+
+    .btn-secondary:hover {
+      background: var(--neutral-300);
+    }
+
+    .btn-small {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .btn-block {
+      width: 100%;
+      display: block;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Cards & Info Boxes */
+    .info-box {
+      background: #FEF3C7;
+      border: 1px solid #FDE68A;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #78350F;
+    }
+
+    .success-box {
+      background: #ECFDF5;
+      border: 1px solid #D1FAE5;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #065F46;
+    }
+
+    .demo-account {
+      background: var(--neutral-100);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+
+    .demo-account-option {
+      padding: 8px;
+      margin: 4px 0;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .demo-account-option:hover {
+      background: var(--neutral-200);
+    }
+
+    /* Right Panel: DPO Monitor ─── */
+    .right-panel {
+      background: var(--dpo-bg);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      color: #E5E7EB;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .dpo-header {
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--dpo-border);
+      margin-bottom: 20px;
+    }
+
+    .dpo-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .dpo-header p {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+
+    /* Tabs */
+    .dpo-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--dpo-border);
+      overflow-x: auto;
+    }
+
+    .dpo-tab {
+      padding: 8px 12px;
+      border: none;
+      background: none;
+      color: #9CA3AF;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .dpo-tab.active {
+      color: white;
+      border-bottom-color: var(--ql-amber);
+    }
+
+    .dpo-tab:hover {
+      color: #D1D5DB;
+    }
+
+    /* Tab Content */
+    .dpo-content {
+      display: none;
+    }
+
+    .dpo-content.active {
+      display: block;
+    }
+
+    /* Ledger Table */
+    .ledger-table {
+      width: 100%;
+      font-size: 12px;
+    }
+
+    .ledger-table th {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid var(--dpo-border);
+      color: #9CA3AF;
+      font-weight: 600;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .ledger-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--dpo-border);
+    }
+
+    .ledger-table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-granted {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6EE7B7;
+    }
+
+    .status-withdrawn {
+      background: rgba(239, 68, 68, 0.2);
+      color: #FCA5A5;
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: #FCD34D;
+    }
+
+    /* Rights Section */
+    .rights-buttons {
+      display: grid;
+      gap: 8px;
+    }
+
+    .right-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--dpo-border);
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .right-btn:hover {
+      background: rgba(217, 119, 6, 0.2);
+      border-color: var(--ql-amber);
+    }
+
+    /* Compliance Checklist */
+    .checklist {
+      font-size: 12px;
+    }
+
+    .checklist-item {
+      padding: 8px;
+      margin-bottom: 4px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 4px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .checklist-icon {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+    }
+
+    .checklist-icon.pass::before {
+      content: "✓";
+      color: #10B981;
+      font-weight: 700;
+    }
+
+    .checklist-icon.fail::before {
+      content: "✗";
+      color: #EF4444;
+      font-weight: 700;
+    }
+
+    .checklist-text {
+      flex: 1;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 24px;
+      color: #9CA3AF;
+    }
+
+    .empty-state p {
+      font-size: 12px;
+      margin: 0;
+    }
+
+    /* Loading & Animations */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(217, 119, 6, 0.2);
+      border-top-color: var(--ql-amber);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .processing-animation {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .processing-animation .spinner {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 16px;
+    }
+
+    .processing-animation p {
+      color: var(--neutral-600);
+      font-size: 14px;
+    }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border-left: 4px solid var(--ql-amber);
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      font-size: 14px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+      max-width: 300px;
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.info { border-left-color: #3B82F6; }
+
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .left-panel {
+        padding: 20px;
+      }
+
+      .right-panel {
+        max-height: 100vh;
+      }
+
+      .screen h2 {
+        font-size: 18px;
+      }
+
+      .brand-header {
+        margin-bottom: 20px;
+      }
+    }
+
+    /* SDK Modal Overrides — SDK injects a single iframe with es-consent-* attribute */
+    iframe[data-es-consent-modal] {
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- LEFT PANEL: USER JOURNEY -->
+  <div class="left-panel">
+    <div class="brand-header">
+      <div class="brand-logo">⚡</div>
+      <div class="brand-text">
+        <h1>QuickLend Finance</h1>
+        <p>Personal Loan — Privacy-First</p>
+      </div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper" id="stepper"></div>
+
+    <!-- Screens Container -->
+    <div id="screens-container"></div>
+  </div>
+
+  <!-- RIGHT PANEL: DPO MONITOR -->
+  <div class="right-panel">
+    <div class="dpo-header">
+      <h3>DPO Compliance Monitor</h3>
+      <p>Real-time consent tracking for <span id="dpo-principal-id">not logged in</span></p>
+    </div>
+
+    <div class="dpo-tabs">
+      <button class="dpo-tab active" data-tab="ledger">Consent Ledger</button>
+      <button class="dpo-tab" data-tab="rights">Data Rights</button>
+      <button class="dpo-tab" data-tab="s6">S.6 Compliance</button>
+    </div>
+
+    <!-- Tab: Consent Ledger -->
+    <div class="dpo-content active" id="ledger">
+      <div id="ledger-content" class="empty-state">
+        <p>No consent data yet. Complete a consent capture to see results here.</p>
+      </div>
+    </div>
+
+    <!-- Tab: Data Rights -->
+    <div class="dpo-content" id="rights">
+      <div class="rights-buttons">
+        <button class="right-btn" id="btn-dsar" onclick="openDSAR()">Data Access Request (DSAR)</button>
+        <button class="right-btn" id="btn-correct" onclick="openCorrection()">Correction Request</button>
+        <button class="right-btn" id="btn-grievance" onclick="openGrievance()">Lodge Grievance</button>
+        <button class="right-btn" id="btn-nominee" onclick="openNominee()">Register Nominee</button>
+        <button class="right-btn" id="btn-pwd-guardian" onclick="openPwdGuardian()">Guardianship Verification (S.9(3) Rule 11)</button>
+        <button class="right-btn" id="btn-breaches" onclick="openBreaches()">Breach Notices</button>
+        <button class="right-btn" id="btn-manage" onclick="managePreferences()">Manage Preferences</button>
+      </div>
+    </div>
+
+    <!-- Tab: S.6 Compliance -->
+    <div class="dpo-content" id="s6">
+      <div class="checklist">
+        <div class="checklist-item">
+          <div class="checklist-icon pass"></div>
+          <div class="checklist-text">Explicit opt-in (not pre-ticked)</div>
+        </div>
+        <div class="checklist-item">
+          <div class="checklist-icon pass"></div>
+          <div class="checklist-text">Age gate (minor consent protected)</div>
+        </div>
+        <div class="checklist-item">
+          <div class="checklist-icon pass"></div>
+          <div class="checklist-text">Mandatory/optional segregation</div>
+        </div>
+        <div class="checklist-item">
+          <div class="checklist-icon pass"></div>
+          <div class="checklist-text">Notice linked (hash-verified)</div>
+        </div>
+        <div class="checklist-item">
+          <div class="checklist-icon pass"></div>
+          <div class="checklist-text">Withdrawal path clear (≤3 clicks)</div>
+        </div>
+        <div class="checklist-item">
+          <div class="checklist-icon pass"></div>
+          <div class="checklist-text">Audit trail immutable (hash-chained)</div>
+        </div>
+        <div class="checklist-item">
+          <div class="checklist-icon pass"></div>
+          <div class="checklist-text">Consent artifact downloadable</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- Consent Modal Container -->
+<div id="consent-modal-root"></div>
+
+<!-- Optional runtime config; absent in dev (inline script seeds an empty default so the
+     inline app code falls back to localhost). Copy config/env.example.js to config/env.js. -->
+<script>window.DEMO_CONFIG = window.DEMO_CONFIG || {};</script>
+<script src="./config/env.js"></script>
+
+<!-- e-Sahamati SDK (unified bundle — registers <es-consent-modal> + exposes window.Esahamati) -->
+<script src="./js/sdk-loader.js" data-load="consent"></script>
+
+<script>
+// Escape HTML special characters to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ─── STATE & CONFIG ───
+const __CFG = window.DEMO_CONFIG || {};
+const ORG_ID = __CFG.ORG_ID || 'org-quicklend-001';
+const API_BASE = __CFG.API_BASE || 'http://localhost:4000/api/v1';
+const CONSENT_UI = __CFG.CONSENT_UI || 'http://localhost:3000';
+// Seeded data principals of the QuickLend org; config/env.js DEMO_ACCOUNTS
+// replaces them for an organisation with its own principals.
+const DEMO_ACCOUNTS = Array.isArray(__CFG.DEMO_ACCOUNTS) && __CFG.DEMO_ACCOUNTS.length > 0
+  ? __CFG.DEMO_ACCOUNTS
+  : [
+      { phone: '+919876543210', name: 'Priya Sharma', dob: '1990-08-22' },
+      { phone: '+919876543210', name: 'Rahul Mehta', dob: '1985-11-03' },
+      { phone: '+919876543210', name: 'Anjali Patel (Minor)', dob: '2012-05-15' }
+    ];
+
+// QuickLend's published profiles; config/env.js PROFILE_CODES overrides
+// individual steps for an organisation whose profiles are named differently.
+const PROFILE_CODES = Object.assign({
+  kyc: 'identity-kyc-verification',
+  credit: 'credit-financial-assessment',
+  loan: 'loan-processing-repayment',
+  insurance: 'insurance-protection-plans',
+  marketing: 'marketing-communications'
+}, __CFG.PROFILE_CODES || {});
+
+function ageFromDob(dob) {
+  const birth = new Date(dob);
+  const today = new Date();
+  return today.getFullYear() - birth.getFullYear() - (
+    today.getMonth() < birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate()) ? 1 : 0
+  );
+}
+
+const STATE = {
+  screen: 'welcome',
+  principalId: null,
+  authToken: null,
+  name: '',
+  phone: '',
+  age: null,
+  isMinor: false,
+  otpRequestId: null,
+  otpSent: false,
+  consentRecords: [],
+};
+
+const SCREENS = [
+  { id: 'welcome', title: 'Welcome' },
+  { id: 'age', title: 'Age Verification' },
+  { id: 'register', title: 'Login / Register' },
+  { id: 'otp', title: 'Verify OTP' },
+  { id: 'kyc', title: 'Identity Check' },
+  { id: 'credit', title: 'Credit Assessment' },
+  { id: 'loan-consent', title: 'Loan Processing' },
+  { id: 'insurance', title: 'Protection Plans' },
+  { id: 'processing', title: 'Processing' },
+  { id: 'success', title: 'Loan Approved' },
+  { id: 'marketing', title: 'Communications' },
+  { id: 'finish', title: 'Complete' },
+];
+
+// ─── INITIALIZATION ───
+function init() {
+  renderStepper();
+  renderScreens();
+  setupDPOTabs();
+  setupSDK();
+
+  // Wait for Web Component to be registered before starting
+  if (customElements.get('es-consent-modal')) {
+    goToScreen('welcome');
+  } else {
+    // Wait up to 2 seconds for the Web Component to register
+    let attempts = 0;
+    const waitForComponent = setInterval(() => {
+      attempts++;
+      if (customElements.get('es-consent-modal') || attempts > 20) {
+        clearInterval(waitForComponent);
+        goToScreen('welcome');
+      }
+    }, 100);
+  }
+}
+
+function renderStepper() {
+  const stepper = document.getElementById('stepper');
+  SCREENS.forEach((screen, idx) => {
+    const step = document.createElement('div');
+    step.className = 'step';
+    step.textContent = idx + 1;
+    step.onclick = () => goToScreen(screen.id);
+    step.id = 'step-' + screen.id;
+    stepper.appendChild(step);
+  });
+}
+
+function renderScreens() {
+  const container = document.getElementById('screens-container');
+
+  container.innerHTML = `
+    <!-- Welcome -->
+    <div class="screen active" data-screen="welcome">
+      <h2>Get Your Personal Loan Today</h2>
+      <p>Fast approval. Simple process. Your data, protected.</p>
+      <div class="info-box">
+        <strong>What we protect:</strong> Your personal data is encrypted, consent-tracked, and audited. You have full control over every step.
+      </div>
+      <button class="btn btn-primary btn-block" onclick="goToScreen('age')">
+        Apply for Loan
+      </button>
+    </div>
+
+    <!-- Age Verification -->
+    <div class="screen" data-screen="age">
+      <h2>Age Verification</h2>
+      <p>We need to verify you're 18+ or arrange guardian consent.</p>
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input type="date" id="dob" onchange="validateAge()">
+      </div>
+      <div id="age-feedback"></div>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('welcome')" style="margin-bottom: 8px;">
+        Back
+      </button>
+    </div>
+
+    <!-- Register/Login -->
+    <div class="screen" data-screen="register">
+      <h2>Create Account / Login</h2>
+      <p>Use phone or email to send OTP.</p>
+
+      <div class="demo-account">
+        <strong>Quick Demo (Use OTP: 123456)</strong>
+        ${DEMO_ACCOUNTS.map((acc, i) => `
+        <div class="demo-account-option" onclick="fillDemo(${i})">
+          ${escapeHtml(acc.name)} (${escapeHtml(acc.phone)})${acc.dob ? ' — ' + (ageFromDob(acc.dob) < 18 ? 'Minor' : 'Adult') : ''}
+        </div>`).join('')}
+      </div>
+
+      <div class="form-group">
+        <label>Phone or Email</label>
+        <input type="text" id="phone-email" placeholder="+91 or email">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="sendOTP()" style="margin-bottom: 8px;">
+        Send OTP
+      </button>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('age')">
+        ← Back
+      </button>
+    </div>
+
+    <!-- OTP Verification -->
+    <div class="screen" data-screen="otp">
+      <h2>Enter OTP</h2>
+      <p>Check your phone/email for the 6-digit code. Demo: <strong>123456</strong></p>
+      <div class="form-group">
+        <label>OTP Code</label>
+        <input type="text" id="otp-code" placeholder="000000" maxlength="6">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="verifyOTP()" style="margin-bottom: 8px;">
+        Verify OTP
+      </button>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('register')">
+        ← Back
+      </button>
+    </div>
+
+    <!-- Identity & KYC Verification -->
+    <div class="screen" data-screen="kyc">
+      <h2>Identity & KYC Verification</h2>
+      <p>We need to verify your identity and conduct Know Your Customer (KYC) checks. This is a legal requirement.</p>
+      <div class="info-box">
+        <strong>What we'll verify:</strong> Name, address, PAN, and government ID to ensure authenticity and prevent fraud.
+      </div>
+      <div id="kyc-consent-container"></div>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('otp')" style="margin-bottom: 8px;">
+        ← Back
+      </button>
+    </div>
+
+    <!-- Credit & Financial Assessment -->
+    <div class="screen" data-screen="credit">
+      <h2>Credit & Financial Assessment</h2>
+      <p>We'll check your credit score and financial history to assess loan eligibility and determine the best rate for you.</p>
+      <div class="info-box">
+        <strong>What we'll check:</strong> Credit score, transaction history, existing loans, and payment patterns.
+      </div>
+      <div id="credit-consent-container"></div>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('kyc')" style="margin-bottom: 8px;">
+        ← Back
+      </button>
+    </div>
+
+    <!-- Loan Processing -->
+    <div class="screen" data-screen="loan-consent">
+      <h2>Loan Processing & Repayment</h2>
+      <p>Grant consent for loan processing and automatic repayment via eNACH (electronic bank transfer).</p>
+      <div class="info-box">
+        <strong>eNACH Mandate:</strong> Gives us permission to debit your account on the agreed loan repayment dates.
+      </div>
+      <div id="minor-consent-container"></div>
+      <div id="consent-container"></div>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('credit')" style="margin-bottom: 8px;">
+        ← Back
+      </button>
+    </div>
+
+    <!-- Insurance & Protection Plans -->
+    <div class="screen" data-screen="insurance">
+      <h2>Insurance & Protection Plans</h2>
+      <p>Optional: Protect your loan with insurance coverage and explore additional financial products.</p>
+      <div class="success-box">
+        <strong>Benefits:</strong> Loan protection if you lose income, life insurance, and income protection plans.
+      </div>
+      <div id="insurance-consent-container"></div>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('loan-consent')" style="margin-bottom: 8px;">
+        ← Back
+      </button>
+    </div>
+
+    <!-- Processing -->
+    <div class="screen" data-screen="processing">
+      <div class="processing-animation">
+        <div class="spinner"></div>
+        <p>Processing your loan application...</p>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="screen" data-screen="success">
+      <h2>Loan Approved</h2>
+      <p>Congratulations! Your loan has been approved and funds are being transferred.</p>
+      <div class="success-box">
+        <strong>Confirmation:</strong> A consent artifact has been saved and you can download it anytime.
+      </div>
+      <button class="btn btn-primary btn-block" onclick="downloadConsentArtifact()" style="margin-bottom: 8px;">
+        Download Consent Certificate
+      </button>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('marketing')">
+        Continue
+      </button>
+    </div>
+
+    <!-- Marketing Opt-In -->
+    <div class="screen" data-screen="marketing">
+      <h2>Optional: Marketing Communications</h2>
+      <p>Stay updated with offers and news. Unsubscribe anytime.</p>
+      <div id="marketing-container"></div>
+      <button class="btn btn-secondary btn-block" onclick="goToScreen('success')" style="margin-bottom: 8px;">
+        ← Back
+      </button>
+      <button class="btn btn-primary btn-block" onclick="goToScreen('finish')">
+        Finish
+      </button>
+    </div>
+
+    <!-- Finish -->
+    <div class="screen" data-screen="finish">
+      <h2>Demo Complete</h2>
+      <p>You can now see your complete consent history in the DPO Monitor (right panel).</p>
+      <div class="success-box">
+        <strong>Next steps:</strong>
+        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+          <li>View consent ledger in DPO Monitor</li>
+          <li>Try withdrawing a purpose</li>
+          <li>File a DSAR to see your data</li>
+          <li>Restart to test a different journey</li>
+        </ul>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="restart()">
+        Start New Demo
+      </button>
+    </div>
+  `;
+}
+
+function setupDPOTabs() {
+  document.querySelectorAll('.dpo-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      document.querySelectorAll('.dpo-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.dpo-content').forEach(c => c.classList.remove('active'));
+      e.target.classList.add('active');
+      document.getElementById(e.target.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+function setupSDK() {
+  // Web Component SDK is automatically registered when the script loads
+  // No initialization needed — we'll create modal instances on demand
+}
+
+function setupConsentModalListeners(modal) {
+  // Principal accepted → detail: { receiptId, consentIds, hadMandatory }
+  modal.addEventListener('granted', (event) => {
+    const detail = event.detail || {};
+    const count = Array.isArray(detail.consentIds) ? detail.consentIds.length : 0;
+    showToast('Consent captured: ' + count + ' purposes', 'success');
+    refreshConsentRecords();
+  });
+
+  // Principal rejected → detail: { hadMandatory, consentIds }
+  // This demo is a dashboard (not a gate-flow) so we always refresh rather
+  // than blocking navigation. We still use `hadMandatory` to phrase the
+  // toast truthfully: mandatory purposes under S7 / S6 stay captured even
+  // on "Reject all", so we shouldn't tell the user nothing was recorded.
+  modal.addEventListener('rejected', (event) => {
+    const detail = event.detail || {};
+    const message = detail.hadMandatory
+      ? 'Optional consents declined; required ones remain captured'
+      : 'Consent rejected';
+    showToast(message, 'info');
+    refreshConsentRecords();
+  });
+
+  // Modal dismissed (any path: X, ESC, overlay, post-grant)
+  modal.addEventListener('close', () => {
+    // Modal tidies itself; host can update UI here.
+  });
+
+  // Error — detail: { code, message }
+  modal.addEventListener('error', (event) => {
+    const detail = event.detail || {};
+    const msg = detail.message || 'Unknown error';
+    showToast('Error: ' + msg, 'error');
+  });
+
+  // Iframe loaded and ready to receive theme hints
+  modal.addEventListener('ready', () => {
+    // no-op
+  });
+}
+
+// ─── SCREEN NAVIGATION ───
+function goToScreen(screenId) {
+  STATE.screen = screenId;
+  const screenIdx = SCREENS.findIndex(s => s.id === screenId);
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const screen = document.querySelector('[data-screen="' + screenId + '"]');
+  if (screen) screen.classList.add('active');
+
+  document.querySelectorAll('.step').forEach((step, idx) => {
+    step.classList.remove('active', 'completed');
+    if (idx < screenIdx) step.classList.add('completed');
+    if (idx === screenIdx) step.classList.add('active');
+  });
+
+  // Show consent modals at appropriate stages
+  if (screenId === 'kyc') {
+    setTimeout(() => showConsentModal(PROFILE_CODES.kyc), 300);
+  } else if (screenId === 'credit') {
+    setTimeout(() => showConsentModal(PROFILE_CODES.credit), 300);
+  } else if (screenId === 'loan-consent') {
+    setTimeout(() => showConsentModal(PROFILE_CODES.loan), 300);
+  } else if (screenId === 'insurance') {
+    setTimeout(() => showConsentModal(PROFILE_CODES.insurance), 300);
+  } else if (screenId === 'marketing') {
+    setTimeout(() => showConsentModal(PROFILE_CODES.marketing), 300);
+  } else if (screenId === 'processing') {
+    setTimeout(() => goToScreen('success'), 2000);
+  }
+}
+
+function restart() {
+  STATE.screen = 'welcome';
+  STATE.principalId = null;
+  STATE.authToken = null;
+  STATE.consentRecords = [];
+  STATE.otpSent = false;
+  document.getElementById('dpo-principal-id').textContent = 'not logged in';
+
+  // Clear ledger content safely
+  const ledgerContent = document.getElementById('ledger-content');
+  ledgerContent.innerHTML = '';
+  const emptyState = document.createElement('div');
+  emptyState.className = 'empty-state';
+  const p = document.createElement('p');
+  p.textContent = 'No consent data yet.';
+  emptyState.appendChild(p);
+  ledgerContent.appendChild(emptyState);
+
+  // Close any open modals
+  const modal = document.querySelector('es-consent-modal');
+  if (modal) {
+    modal.open = false;
+  }
+
+  goToScreen('welcome');
+}
+
+// ─── AGE VERIFICATION ───
+function validateAge() {
+  const dob = document.getElementById('dob').value;
+  if (!dob) return;
+
+  const birth = new Date(dob);
+  const today = new Date();
+  const age = today.getFullYear() - birth.getFullYear() - (
+    today.getMonth() < birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate()) ? 1 : 0
+  );
+
+  STATE.age = age;
+  STATE.isMinor = age < 18;
+
+  const feedback = document.getElementById('age-feedback');
+  if (age >= 18) {
+    feedback.innerHTML = '<div class="success-box">✓ You\'re ' + age + ' years old. Proceed with personal consent.</div>';
+    setTimeout(() => goToScreen('register'), 300);
+  } else {
+    feedback.innerHTML = '<div class="info-box">You\'re ' + age + ' years old. We\'ll capture guardian consent.</div>';
+    setTimeout(() => goToScreen('register'), 300);
+  }
+}
+
+function fillDemo(accountIdx) {
+  const account = DEMO_ACCOUNTS[accountIdx];
+  document.getElementById('phone-email').value = String(account.phone || '').replace(/[-\s]/g, '');
+  STATE.name = account.name;
+  if (account.dob) {
+    document.getElementById('dob').value = account.dob;
+    const age = ageFromDob(account.dob);
+    STATE.age = age;
+    STATE.isMinor = age < 18;
+  }
+  showToast('Demo account loaded: ' + account.name + '. Send OTP to continue.', 'info');
+}
+
+// ─── OTP FLOW ───
+async function sendOTP() {
+  const phoneEmail = document.getElementById('phone-email').value || STATE.phone;
+  if (!phoneEmail) {
+    showToast('Please enter phone or email', 'error');
+    return;
+  }
+
+  STATE.phone = phoneEmail;
+
+  try {
+    const response = await fetch(API_BASE + '/auth/otp/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orgId: ORG_ID, phone: phoneEmail })
+    });
+
+    if (!response.ok) {
+      showToast('Phone/email not found. Proceeding as anonymous.', 'info');
+      STATE.principalId = null;
+      STATE.authToken = null;
+      goToScreen('loan-consent');
+      return;
+    }
+
+    const result = await response.json();
+    STATE.otpRequestId = result.data.requestId;
+    STATE.otpSent = true;
+    showToast('OTP sent (demo: 123456)', 'success');
+    goToScreen('otp');
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+async function verifyOTP() {
+  const otp = document.getElementById('otp-code').value;
+  if (otp.length !== 6) {
+    showToast('Please enter 6-digit OTP', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(API_BASE + '/auth/otp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requestId: STATE.otpRequestId, otp: otp })
+    });
+
+    if (!response.ok) {
+      showToast('Invalid OTP. Try again with 123456.', 'error');
+      return;
+    }
+
+    const result = await response.json();
+    STATE.principalId = result.data.principalId;
+    STATE.authToken = result.data.token;
+    STATE.name = result.data.name || STATE.name;
+    document.getElementById('dpo-principal-id').textContent = STATE.principalId.substring(0, 8) + '...';
+
+    showToast('Logged in as ' + STATE.name, 'success');
+    refreshConsentRecords();
+    goToScreen('loan-consent');
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+// ─── CONSENT MODALS ───
+function showConsentModal(profileCode) {
+  // Check if custom element is available
+  if (!customElements.get('es-consent-modal')) {
+    console.error('es-consent-modal element not registered');
+    showToast('Consent UI not ready. Please try again.', 'error');
+    return;
+  }
+
+  // If minor and loan consent, show guardian notice
+  if (STATE.isMinor && profileCode === PROFILE_CODES.loan) {
+    const container = document.getElementById('minor-consent-container');
+    const p = document.createElement('p');
+    p.style.margin = '16px 0';
+    p.style.color = '#666';
+    const strong = document.createElement('strong');
+    strong.textContent = 'Guardian Consent Required';
+    p.appendChild(strong);
+    container.innerHTML = '';
+    container.appendChild(p);
+  }
+
+  // Create or reuse modal element
+  let modal = document.querySelector('es-consent-modal');
+
+  if (!modal) {
+    modal = document.createElement('es-consent-modal');
+    document.getElementById('consent-modal-root').appendChild(modal);
+    setupConsentModalListeners(modal);
+  }
+
+  // Configure modal attributes
+  modal.setAttribute('org-id', ORG_ID);
+  modal.setAttribute('api-base', API_BASE);
+  modal.setAttribute('consent-ui-base', CONSENT_UI);
+  // The left panel is light; force light theme so the modal matches regardless of OS preference.
+  modal.setAttribute('theme', 'light');
+
+  if (profileCode) {
+    modal.setAttribute('profile-code', profileCode);
+  } else {
+    modal.removeAttribute('profile-code');
+  }
+
+  if (STATE.authToken) {
+    modal.setAttribute('auth-token', STATE.authToken);
+    modal.setAttribute('principal-id', STATE.principalId);
+  } else {
+    modal.removeAttribute('auth-token');
+    modal.removeAttribute('principal-id');
+  }
+
+  // Show modal - with a small delay to ensure initialization
+  setTimeout(() => {
+    modal.open = true;
+    if (typeof modal.show === 'function') {
+      modal.show().catch((error) => {
+        console.error('Failed to show consent modal:', error);
+        showToast('Error showing consent modal: ' + error.message, 'error');
+      });
+    } else {
+      console.error('modal.show is not a function. Modal methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(modal)));
+      showToast('Consent modal not initialized properly', 'error');
+    }
+  }, 100);
+}
+
+// ─── DPO PANEL: CONSENT RECORDS ───
+async function refreshConsentRecords() {
+  if (!STATE.principalId) return;
+
+  try {
+    const response = await fetch(API_BASE + '/consent/' + STATE.principalId, {
+      headers: STATE.authToken ? { 'Authorization': 'Bearer ' + STATE.authToken } : {}
+    });
+
+    if (!response.ok) {
+      document.getElementById('ledger-content').innerHTML = '<p style="text-align: center; color: #9CA3AF; font-size: 12px;">Unable to load consent records.</p>';
+      return;
+    }
+
+    const result = await response.json();
+    STATE.consentRecords = result.data && result.data.consents ? result.data.consents : [];
+    renderLedger();
+  } catch (error) {
+    console.error('Failed to fetch consent records:', error);
+  }
+}
+
+function renderLedger() {
+  const ledger = document.getElementById('ledger-content');
+
+  if (!STATE.consentRecords || STATE.consentRecords.length === 0) {
+    ledger.innerHTML = '<div class="empty-state"><p>No consent records yet.</p></div>';
+    return;
+  }
+
+  let html = '<table class="ledger-table"><thead><tr><th>Purpose</th><th>Profile</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+
+  STATE.consentRecords.forEach(record => {
+    const purpose = record.purposeCode || '—';
+    const profile = record.profileCode || '—';
+    const date = new Date(record.grantedAt || record.createdAt).toLocaleDateString();
+    const status = record.status || 'pending';
+    const statusClass = status === 'granted' ? 'status-granted' : 'status-withdrawn';
+    const action = status === 'granted'
+      ? '<button class="btn btn-small" onclick="withdrawConsent(\'' + escapeHtml(record.purposeCode) + '\')">Revoke</button>'
+      : 'Withdrawn';
+
+    html += '<tr><td>' + escapeHtml(purpose) + '</td><td>' + escapeHtml(profile) + '</td><td>' + date + '</td>';
+    html += '<td><span class="status-badge ' + statusClass + '">' + status + '</span></td>';
+    html += '<td>' + action + '</td></tr>';
+  });
+
+  html += '</tbody></table>';
+  ledger.innerHTML = html;
+}
+
+async function withdrawConsent(purposeCode) {
+  if (!STATE.principalId || !STATE.authToken) {
+    showToast('Please login first', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(API_BASE + '/consent/' + STATE.principalId + '/withdraw', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + STATE.authToken
+      },
+      body: JSON.stringify({ purposeCode: purposeCode })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to withdraw consent');
+    }
+
+    showToast('Consent withdrawn for ' + purposeCode, 'success');
+    refreshConsentRecords();
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    showToast('Error: ' + msg, 'error');
+  }
+}
+
+// ─── DATA RIGHTS NAVIGATION ───
+function openDSAR() {
+  if (!STATE.principalId) {
+    showToast('Please login first', 'error');
+    return;
+  }
+  window.open(CONSENT_UI + '/' + ORG_ID + '/data-access', '_blank');
+}
+
+function openCorrection() {
+  if (!STATE.principalId) {
+    showToast('Please login first', 'error');
+    return;
+  }
+  window.open(CONSENT_UI + '/' + ORG_ID + '/correction', '_blank');
+}
+
+function openGrievance() {
+  if (!STATE.principalId) {
+    showToast('Please login first', 'error');
+    return;
+  }
+  window.open(CONSENT_UI + '/' + ORG_ID + '/grievance', '_blank');
+}
+
+function openNominee() {
+  if (!STATE.principalId) {
+    showToast('Please login first', 'error');
+    return;
+  }
+  window.open(CONSENT_UI + '/' + ORG_ID + '/nominee', '_blank');
+}
+
+// DPDP S.9(3) Rule 11 — lawful-guardian verification. The person with
+// disability or a guardian appointed by a court / RPDA S.15 authority /
+// National Trust S.13 committee uploads the appointment artefact for org
+// review. The subject is marked is_pwd on submission — no separate
+// self-declaration step.
+function openPwdGuardian() {
+  if (!STATE.principalId) {
+    showToast('Please login first', 'error');
+    return;
+  }
+  window.open(CONSENT_UI + '/' + ORG_ID + '/pwd-guardian', '_blank');
+}
+
+function openBreaches() {
+  if (!STATE.principalId) {
+    showToast('Please login first', 'error');
+    return;
+  }
+  window.open(CONSENT_UI + '/' + ORG_ID + '/breaches', '_blank');
+}
+
+function managePreferences() {
+  window.eSahamati.showPreferences();
+}
+
+function downloadConsentArtifact() {
+  if (STATE.consentRecords.length === 0) {
+    showToast('No consent artifacts available yet', 'info');
+    return;
+  }
+  const latest = STATE.consentRecords[0];
+  if (latest.id) {
+    window.open(API_BASE + '/consent/artifact/' + latest.id, '_blank');
+  }
+}
+
+// ─── UTILITIES ───
+function showToast(message, type) {
+  type = type || 'info';
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// Auto-refresh consent records
+setInterval(() => {
+  if (STATE.principalId && STATE.screen !== 'finish') {
+    refreshConsentRecords();
+  }
+}, 10000);
+
+// Initialize
+window.addEventListener('load', init);
+</script>
+
+</body>
+</html>
