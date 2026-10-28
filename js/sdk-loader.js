@@ -11,6 +11,23 @@
   var SDK_FILE = "esahamati.0.4.1.min.js";
   var COOKIE_BANNER_FILE = "cookie-banner.0.2.8.min.js";
 
+  // Opened from disk (file://): the consent UI refuses to be framed by a file://
+  // page (its CSP frame-ancestors covers http/https only) and the API rejects the
+  // "null" origin, so nothing works. Say so on the page instead of failing silently.
+  if (window.location.protocol === "file:") {
+    var message = "This demo must be served over http(s): run `npm start` in this folder " +
+      "and open http://localhost:8000 (opened from disk, the consent pop-up and API calls are blocked).";
+    console.error("[demo] " + message);
+    document.addEventListener("DOMContentLoaded", function () {
+      var bar = document.createElement("div");
+      bar.setAttribute("role", "alert");
+      bar.textContent = message;
+      bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:2147483647;padding:12px 16px;" +
+        "background:#B91C1C;color:#fff;font:600 14px/1.4 system-ui,sans-serif;text-align:center";
+      document.body.appendChild(bar);
+    });
+  }
+
   var cfg = window.DEMO_CONFIG || {};
   var consentUi = (cfg.CONSENT_UI || "http://localhost:3000").replace(/\/+$/, "");
   var wanted = ((document.currentScript && document.currentScript.dataset.load) || "consent").split(/\s+/);

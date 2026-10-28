@@ -29,6 +29,10 @@ npm start      # serves on http://localhost:8000 and opens index.html
 `npm run start:dpo` opens `dpo.html`. Use port 8000: e-Sahamati's CORS allow-list
 includes `http://localhost:8000`.
 
+Do not open the HTML files directly from disk (`file://`). The consent UI refuses to
+be framed by a `file://` page and the API rejects its `null` origin, so the consent
+pop-up never appears; the page shows a red banner saying so.
+
 To run against a local e-Sahamati instead (`npm run dev` in the e-sahamati repo: API on
 `localhost:4000`, consent UI on `localhost:3000`), copy `config/env.example.js` over
 `config/env.js` and do not commit that change.
