@@ -24,6 +24,25 @@
     secondaryColor: "#1A2B5F",
     accentColor: "#0EA5E9"
   };
+  var PRODUCT_DEFAULTS = {
+    name: "Personal Loan",
+    amount: 250000,
+    minAmount: 50000,
+    maxAmount: 1000000,
+    amountStep: 10000,
+    tenureMonths: 24,
+    interestRate: 11.5,
+    emi: null,
+    payoutTime: "2 hours",
+    insurancePlans: [
+      { name: "Basic Protection", monthlyPrice: 99, features: ["Loss of income coverage", "Disability coverage"] },
+      {
+        name: "Comprehensive",
+        monthlyPrice: 199,
+        features: ["All benefits of Basic", "Critical illness coverage", "Accidental death benefit"]
+      }
+    ]
+  };
   // How long the first render waits for the org's branding before giving up.
   var ORG_FETCH_TIMEOUT_MS = 3000;
 
@@ -31,6 +50,7 @@
   var local = window.NBFC_BRAND || {};
   var org = {};
   var brand = resolve();
+  var product = resolveProduct(local.product || {});
 
   function escapeHtml(value) {
     return String(value == null ? "" : value)
@@ -78,10 +98,11 @@
   function resolve() {
     var orgName = text(org.name);
     var shortName = first(text(local.shortName), orgName && stripLegalSuffix(orgName), DEFAULTS.shortName);
-    var primary = first(hex(local.primaryColor), hex(org.primaryColor), DEFAULTS.primaryColor);
+    var primary = first(hex(local.primaryColor), hex(org.primaryColor), hex(DEFAULTS.primaryColor));
+    // QuickLend pairs its blue with a teal accent; any other primary is its own accent.
     var accent = first(
       hex(local.accentColor),
-      primary === DEFAULTS.primaryColor.toLowerCase() ? DEFAULTS.accentColor : primary
+      primary === hex(DEFAULTS.primaryColor) ? hex(DEFAULTS.accentColor) : primary
     );
     var logoUrl = first(safeUrl(local.logoUrl), safeUrl(org.logoUrl));
     return Object.freeze({
@@ -93,9 +114,65 @@
       logoMonogram: first(text(local.logoMonogram), shortName.charAt(0).toUpperCase()),
       faviconUrl: first(safeUrl(local.faviconUrl), logoUrl),
       primaryColor: primary,
-      secondaryColor: first(hex(local.secondaryColor), hex(org.secondaryColor), DEFAULTS.secondaryColor),
+      secondaryColor: first(hex(local.secondaryColor), hex(org.secondaryColor), hex(DEFAULTS.secondaryColor)),
       accentColor: accent
     });
+  }
+
+  // ---- loan product --------------------------------------------------------
+  function positive(value, fallback) {
+    var n = Number(value);
+    return isFinite(n) && n > 0 ? n : fallback;
+  }
+
+  function resolveProduct(p) {
+    var d = PRODUCT_DEFAULTS;
+    var minAmount = positive(p.minAmount, d.minAmount);
+    var maxAmount = Math.max(minAmount, positive(p.maxAmount, d.maxAmount));
+    var amount = Math.min(maxAmount, Math.max(minAmount, positive(p.amount, d.amount)));
+    var plans = Array.isArray(p.insurancePlans) ? p.insurancePlans : d.insurancePlans;
+    return Object.freeze({
+      name: first(text(p.name), d.name),
+      amount: amount,
+      minAmount: minAmount,
+      maxAmount: maxAmount,
+      amountStep: positive(p.amountStep, d.amountStep),
+      tenureMonths: Math.round(positive(p.tenureMonths, d.tenureMonths)),
+      interestRate: positive(p.interestRate, d.interestRate),
+      emi: positive(p.emi, null),
+      payoutTime: first(text(p.payoutTime), d.payoutTime),
+      insurancePlans: Object.freeze(plans.filter(function (plan) { return plan && text(plan.name); }).map(function (plan) {
+        return Object.freeze({
+          name: text(plan.name),
+          monthlyPrice: positive(plan.monthlyPrice, 0),
+          features: Object.freeze((Array.isArray(plan.features) ? plan.features : []).map(text).filter(Boolean))
+        });
+      }))
+    });
+  }
+
+  // Standard reducing-balance EMI, or the configured figure when one is set.
+  function emiFor(amount) {
+    if (product.emi && amount === product.amount) return product.emi;
+    var r = product.interestRate / 12 / 100;
+    var n = product.tenureMonths;
+    var factor = Math.pow(1 + r, n);
+    return Math.round((amount * r * factor) / (factor - 1));
+  }
+
+  function formatInr(amount) {
+    return "₹ " + Math.round(amount).toLocaleString("en-IN");
+  }
+
+  // 50000 -> "₹50K", 1000000 -> "₹10L", 20000000 -> "₹2Cr"
+  function formatInrShort(amount) {
+    var units = [[1e7, "Cr"], [1e5, "L"], [1e3, "K"]];
+    for (var i = 0; i < units.length; i++) {
+      if (amount >= units[i][0]) {
+        return "₹" + (Math.round((amount / units[i][0]) * 10) / 10) + units[i][1];
+      }
+    }
+    return "₹" + amount;
   }
 
   // ---- colour maths --------------------------------------------------------
@@ -152,7 +229,8 @@
   function fillTemplate(template) {
     return template
       .replace(/\{shortName\}/g, brand.shortName)
-      .replace(/\{fullName\}/g, brand.fullName);
+      .replace(/\{fullName\}/g, brand.fullName)
+      .replace(/\{productName\}/g, product.name);
   }
 
   function applyFavicon() {
@@ -237,6 +315,10 @@
 
   window.NbfcBrand = {
     get: function () { return brand; },
+    product: function () { return product; },
+    emiFor: emiFor,
+    formatInr: formatInr,
+    formatInrShort: formatInrShort,
     escape: escapeHtml,
     logoHtml: logoHtml,
     // Resolves once the org's branding has been applied (or has failed / timed out).

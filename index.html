@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title data-brand-title="{shortName} — Privacy-First Personal Loans" data-brand-title-configurable>QuickLend — Privacy-First Personal Loans</title>
+  <title data-brand-title="{shortName} — Privacy-First {productName}" data-brand-title-configurable>QuickLend — Privacy-First Personal Loans</title>
   <!-- Optional runtime config; absent in dev (inline script seeds an empty default so the
        inline app code falls back to localhost). Copy config/env.example.js to config/env.js. -->
   <script>window.DEMO_CONFIG = window.DEMO_CONFIG || {};</script>
@@ -232,6 +232,7 @@
 
     input[type="range"] {
       width: 100%;
+      accent-color: var(--blue);
     }
 
     /* Buttons */
@@ -573,6 +574,8 @@
     const ORG_ID = __CFG.ORG_ID || "org-quicklend-001";
     const API_BASE = __CFG.API_BASE || "http://localhost:4000/api/v1";
     const CONSENT_UI = __CFG.CONSENT_UI || "http://localhost:3000";
+    // Loan figures from config/brand.js (product); see js/brand.js for defaults.
+    const PRODUCT = NbfcBrand.product();
 
     // Seeded data principals of the QuickLend org; config/env.js DEMO_ACCOUNTS
     // replaces them for an organisation with its own principals.
@@ -602,8 +605,17 @@
       authToken: null,
       principalId: null,
       age: null,
-      otpRequestId: null
+      otpRequestId: null,
+      loanAmount: PRODUCT.amount
     };
+
+    // Welcome-screen slider: the chosen amount carries through to the loan
+    // details and approval screens.
+    function setLoanAmount(value) {
+      STATE.loanAmount = Number(value) || PRODUCT.amount;
+      const display = document.getElementById("loan-amount-display");
+      if (display) display.textContent = NbfcBrand.formatInr(STATE.loanAmount);
+    }
 
     // ====== Journey Bar Config ======
     // Canonical 8-stage DPDP-aligned loan journey:
@@ -654,13 +666,13 @@
             <p class="section-desc" data-brand-text="tagline">${NbfcBrand.escape(NbfcBrand.get().tagline)}</p>
             <div class="card" style="margin: 20px 0;">
               <div style="text-align: center; margin-bottom: 12px;">
-                <div style="font-size: 28px; font-weight: 700; color: var(--navy);">₹ 2,50,000</div>
+                <div id="loan-amount-display" style="font-size: 28px; font-weight: 700; color: var(--navy);">${NbfcBrand.formatInr(STATE.loanAmount)}</div>
                 <div style="font-size: 12px; color: var(--text-muted);">Loan Amount</div>
               </div>
-              <input type="range" min="50000" max="1000000" value="250000" step="10000" style="width: 100%; cursor: pointer;">
+              <input type="range" min="${PRODUCT.minAmount}" max="${PRODUCT.maxAmount}" value="${STATE.loanAmount}" step="${PRODUCT.amountStep}" oninput="setLoanAmount(this.value)" style="width: 100%; cursor: pointer;">
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-                <span>₹50K</span>
-                <span>₹10L</span>
+                <span>${NbfcBrand.formatInrShort(PRODUCT.minAmount)}</span>
+                <span>${NbfcBrand.formatInrShort(PRODUCT.maxAmount)}</span>
               </div>
             </div>
             <div style="flex: 1;"></div>
@@ -825,19 +837,19 @@
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
                 <div>
                   <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Loan Amount</div>
-                  <div style="font-weight: 600; color: var(--navy);">₹ 2,50,000</div>
+                  <div style="font-weight: 600; color: var(--navy);">${NbfcBrand.formatInr(STATE.loanAmount)}</div>
                 </div>
                 <div>
                   <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Tenure</div>
-                  <div style="font-weight: 600; color: var(--navy);">24 months</div>
+                  <div style="font-weight: 600; color: var(--navy);">${PRODUCT.tenureMonths} months</div>
                 </div>
                 <div>
                   <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Interest Rate</div>
-                  <div style="font-weight: 600; color: var(--navy);">11.5% p.a.</div>
+                  <div style="font-weight: 600; color: var(--navy);">${PRODUCT.interestRate}% p.a.</div>
                 </div>
                 <div>
                   <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Monthly EMI</div>
-                  <div style="font-weight: 600; color: var(--navy);">₹ 11,250</div>
+                  <div style="font-weight: 600; color: var(--navy);">${NbfcBrand.formatInr(NbfcBrand.emiFor(STATE.loanAmount))}</div>
                 </div>
               </div>
             </div>
@@ -853,24 +865,15 @@
             <h2 class="section-heading">Loan Protection</h2>
             <p class="section-desc">Optional insurance coverage</p>
 
+            ${PRODUCT.insurancePlans.map(plan => `
             <div class="plan-card" onclick="showConsentModal('insurance')">
-              <div class="plan-name">Basic Protection</div>
-              <div class="plan-price">₹ 99/month</div>
+              <div class="plan-name">${escapeHtml(plan.name)}</div>
+              <div class="plan-price">${NbfcBrand.formatInr(plan.monthlyPrice)}/month</div>
               <div class="plan-features">
-                • Loss of income coverage<br>
-                • Disability coverage
+                ${plan.features.map(f => "• " + escapeHtml(f)).join("<br>")}
               </div>
             </div>
-
-            <div class="plan-card" onclick="showConsentModal('insurance')">
-              <div class="plan-name">Comprehensive</div>
-              <div class="plan-price">₹ 199/month</div>
-              <div class="plan-features">
-                • All benefits of Basic<br>
-                • Critical illness coverage<br>
-                • Accidental death benefit
-              </div>
-            </div>
+            `).join("")}
 
             <div style="flex: 1;"></div>
             <button class="link" onclick="goTo('processing')">Skip for Now</button>
@@ -919,13 +922,13 @@
             <p class="section-desc">Your loan has been approved</p>
             <div class="card">
               <div class="card-title">Approved Amount</div>
-              <div class="card-desc" style="font-size: 16px; font-weight: 600; color: var(--gdk); margin: 8px 0;">₹ 2,50,000</div>
+              <div class="card-desc" style="font-size: 16px; font-weight: 600; color: var(--gdk); margin: 8px 0;">${NbfcBrand.formatInr(STATE.loanAmount)}</div>
               <div style="border-top: 1px solid var(--border); margin: 12px 0; padding-top: 12px;">
                 <div class="card-desc">
                   <strong>Next Steps:</strong><br>
                   • E-sign loan agreement<br>
                   • Set up auto-pay (eNACH)<br>
-                  • Funds to arrive in 2 hours
+                  • Funds to arrive in ${escapeHtml(PRODUCT.payoutTime)}
                 </div>
               </div>
             </div>
@@ -1714,6 +1717,7 @@
       STATE.age = null;
       STATE.otpRequestId = null;
       STATE.artifacts = null;
+      STATE.loanAmount = PRODUCT.amount;
       goTo("welcome");
     }
 

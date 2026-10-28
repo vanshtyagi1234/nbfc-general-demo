@@ -26,7 +26,8 @@ window.NBFC_BRAND = {
   // Line under the name on the welcome screen.
   tagline: "",
 
-  // Browser tab title for index.html. {shortName} and {fullName} are replaced.
+  // Browser tab title for index.html. {shortName}, {fullName} and {productName}
+  // are replaced.
   pageTitle: "",
 
   // Logo image: an https URL or a path relative to this site (e.g. "assets/logo.png").
@@ -46,4 +47,25 @@ window.NBFC_BRAND = {
   primaryColor: "",    // buttons, logo tile, active step
   secondaryColor: "",  // headings, amounts, background gradient, phone frame
   accentColor: "",     // focus rings, step glow, scrollbar. Default: primary
+
+  // Loan product shown in the journey. Leave a field out to keep the default.
+  product: {
+    name: "Personal Loan",
+    amount: 250000,        // starting amount on the welcome slider, in rupees
+    minAmount: 50000,
+    maxAmount: 1000000,
+    amountStep: 10000,
+    tenureMonths: 24,
+    interestRate: 11.5,    // % per annum
+    emi: null,             // monthly EMI in rupees; null = calculated from the above
+    payoutTime: "2 hours", // "Funds to arrive in ..."
+    insurancePlans: [
+      { name: "Basic Protection", monthlyPrice: 99, features: ["Loss of income coverage", "Disability coverage"] },
+      {
+        name: "Comprehensive",
+        monthlyPrice: 199,
+        features: ["All benefits of Basic", "Critical illness coverage", "Accidental death benefit"]
+      }
+    ]
+  }
 };

@@ -585,7 +585,7 @@
       <div class="brand-logo" data-brand-logo="brand-logo-mark"></div>
       <div class="brand-text">
         <h1 data-brand-text="fullName">QuickLend Finance</h1>
-        <p>Personal Loan — Privacy-First</p>
+        <p id="brand-product-line">Personal Loan — Privacy-First</p>
       </div>
     </div>
 
@@ -748,6 +748,7 @@ const SCREENS = [
 
 // ─── INITIALIZATION ───
 function init() {
+  document.getElementById('brand-product-line').textContent = NbfcBrand.product().name + ' — Privacy-First';
   renderStepper();
   renderScreens();
   setupDPOTabs();
@@ -787,7 +788,7 @@ function renderScreens() {
   container.innerHTML = `
     <!-- Welcome -->
     <div class="screen active" data-screen="welcome">
-      <h2>Get Your Personal Loan Today</h2>
+      <h2>Get Your ${escapeHtml(NbfcBrand.product().name)} Today</h2>
       <p>Fast approval. Simple process. Your data, protected.</p>
       <div class="info-box">
         <strong>What we protect:</strong> Your personal data is encrypted, consent-tracked, and audited. You have full control over every step.
