@@ -15,9 +15,10 @@ window.DEMO_CONFIG = {
   SDK_URL: "",
   COOKIE_BANNER_URL: "",
 
-  // "combined": two consent screens (registration notice before sign-up, then
-  // loan-application-consent after it). "full": the deployed QuickLend demo's
-  // seven screens.
+  // Same journey either way; this only sets how many consent screens it opens.
+  // "combined": two (registration notice before sign-up, then
+  // loan-application-consent on the KYC step). "full": seven, one per step, as
+  // on the deployed QuickLend demo.
   JOURNEY: "combined",
 
   PROFILE_CODES: {},

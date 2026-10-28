@@ -11,7 +11,7 @@ every consent, OTP and data-rights call goes to e-Sahamati.
 
 | Page | What it shows |
 |---|---|
-| `index.html` | The main demo: a phone-style loan journey. By default two consent screens (`JOURNEY: "combined"`): the registration notice before sign-up, then one loan-application screen after it, followed by approval, data rights and consent certificates. `JOURNEY: "full"` gives the deployed QuickLend demo's seven screens (KYC, credit bureau, account aggregator, loan, insurance, marketing each separately) |
+| `index.html` | The main demo: a phone-style loan journey (age check, privacy notice, sign-up, OTP, KYC, credit bureau, account aggregator, loan, insurance, approval, data rights, marketing, consent certificates). By default it opens two consent screens (`JOURNEY: "combined"`): the registration notice before sign-up, and one combined screen on the KYC step; the later steps show as usual and move on without another consent screen. `JOURNEY: "full"` opens seven, one per step, as on demo.e-sahamati.com |
 | `dpo.html` | The same journey on the left with a live DPO compliance monitor on the right (consent ledger, data-rights shortcuts, S.6 checklist) |
 | `cookie-banner-demo.html` | The cookie banner on its own, with tag gating and an event log |
 
@@ -93,7 +93,7 @@ local-dev values; the pages fall back to those if `config/env.js` is missing.
 | `CONSENT_UI` | `http://localhost:3000` | Consent UI origin, no trailing slash |
 | `SDK_URL` | `{CONSENT_UI}/sdk/esahamati.0.4.1.min.js` | Consent SDK bundle |
 | `COOKIE_BANNER_URL` | `{CONSENT_UI}/sdk/cookie-banner.0.2.8.min.js` | Cookie banner bundle |
-| `JOURNEY` | `combined` | `combined`: two consent screens on `index.html`. `full`: seven, as on demo.e-sahamati.com |
+| `JOURNEY` | `combined` | Same journey steps either way. `combined`: two consent screens on `index.html` (notice, then one on KYC). `full`: seven, as on demo.e-sahamati.com |
 | `PROFILE_CODES` | QuickLend's profiles | Consent profile per step (`registration`, `combined`, `kyc`, `bureau`, `aa`, `loan`, `insurance`, `marketing`, and `credit` on `dpo.html`). Set only the ones that differ |
 | `DEMO_ACCOUNTS` | QuickLend's seeded principals | `[{ name, phone, dob }]` shown on the sign-up screen. They must exist in `ORG_ID` |
 

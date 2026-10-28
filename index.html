@@ -618,44 +618,49 @@
     }
 
     // ====== Journey Bar Config ======
-    // config/env.js JOURNEY picks one of two journeys:
-    //
-    // "full" — the QuickLend demo's canonical 8-stage DPDP-aligned journey,
-    // seven consent screens:
+    // Canonical 8-stage DPDP-aligned loan journey:
     //   age → register → registration-notice → otp → kyc → bureau → aa → loan
     //   → insurance → success → rights → marketing → finish
-    //
-    // "combined" (default) — two consent screens: the registration notice before
-    // sign-up, then ONE screen after sign-up whose profile (PROFILE_CODES.combined)
-    // lists the KYC, bureau, loan, insurance, marketing and analytics purposes:
-    //   age → registration-notice → register → otp → application → processing
-    //   → success → rights → artifacts → finish
-    //
     // Journey bar shows the user-visible milestones; intermediate screens
     // (otp, processing) are not surfaced as steps.
+    const STEPS = ["age", "register", "kyc", "bureau", "aa", "loan", "insurance", "success", "rights"];
+    const STEP_LABELS = ["Age", "Sign-up", "KYC", "Bureau", "AA", "Loan", "Insure", "Approved", "Rights"];
+    const ORDER = ["welcome", "age", "registration-notice", "register", "otp", "kyc", "bureau", "aa", "loan", "insurance", "processing", "success", "rights", "marketing", "artifacts", "finish"];
+
+    // ====== Consent screens ======
+    // config/env.js JOURNEY decides how many consent screens the same journey shows:
+    //   "full":     seven, one per step (the deployed QuickLend demo).
+    //   "combined": two (default). The registration notice before sign-up, then ONE
+    //               screen on the KYC step whose profile (PROFILE_CODES.combined)
+    //               carries the KYC, bureau, loan, insurance, marketing and
+    //               analytics purposes. The later steps still show, and their
+    //               button moves on instead of opening another consent screen.
     const JOURNEY = __CFG.JOURNEY === "full" ? "full" : "combined";
-    const JOURNEYS = {
-      full: {
-        steps: ["age", "register", "kyc", "bureau", "aa", "loan", "insurance", "success", "rights"],
-        labels: ["Age", "Sign-up", "KYC", "Bureau", "AA", "Loan", "Insure", "Approved", "Rights"],
-        order: ["welcome", "age", "registration-notice", "register", "otp", "kyc", "bureau", "aa", "loan", "insurance", "processing", "success", "rights", "marketing", "artifacts", "finish"],
-        afterOtp: "kyc",
-        afterRights: "marketing"
-      },
-      combined: {
-        steps: ["age", "register", "application", "success", "rights"],
-        labels: ["Age", "Sign-up", "Consent", "Approved", "Rights"],
-        order: ["welcome", "age", "registration-notice", "register", "otp", "application", "processing", "success", "rights", "artifacts", "finish"],
-        afterOtp: "application",
-        afterRights: "artifacts",
-        // Which journey-bar step each screen belongs to; screens not listed take
-        // the step of the screen before them.
-        stepOf: { age: "age", "registration-notice": "register", register: "register", otp: "register", application: "application", success: "success", rights: "rights" }
-      }
+
+    // Per-screen "what comes next" after its consent step. Shared by the
+    // modal's granted / rejected handlers and the combined journey's skips.
+    const NEXT_SCREEN = {
+      "registration-notice": "otp",
+      kyc: "bureau",
+      bureau: "aa",
+      aa: "loan",
+      loan: "insurance",
+      insurance: "processing",
+      marketing: "artifacts"
     };
-    const STEPS = JOURNEYS[JOURNEY].steps;
-    const STEP_LABELS = JOURNEYS[JOURNEY].labels;
-    const ORDER = JOURNEYS[JOURNEY].order;
+
+    // A step's consent action: its own consent screen in the full journey; in the
+    // combined one, the single after-sign-up screen on KYC and a plain "next" after.
+    function stepConsent(step) {
+      if (JOURNEY === "full" || step === "registration") return showConsentModal(step);
+      if (step === "kyc") return showConsentModal("combined");
+      goTo(NEXT_SCREEN[step]);
+    }
+
+    // Button text for a step whose consent screen the combined journey skips.
+    function stepLabel(fullLabel) {
+      return JOURNEY === "full" ? fullLabel : "Continue";
+    }
 
     // ====== SVG Icons ======
     function getSvgCheckmark() {
@@ -793,46 +798,6 @@
         `;
       },
 
-      // Combined journey: the one consent screen after sign-up.
-      application() {
-        return `
-          <div class="screen-content">
-            <h2 class="section-heading">Your Loan Application</h2>
-            <p class="section-desc">One consent covers everything we need to process your loan</p>
-            <div class="card">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
-                <div>
-                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Loan Amount</div>
-                  <div style="font-weight: 600; color: var(--navy);">${NbfcBrand.formatInr(STATE.loanAmount)}</div>
-                </div>
-                <div>
-                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Monthly EMI</div>
-                  <div style="font-weight: 600; color: var(--navy);">${NbfcBrand.formatInr(NbfcBrand.emiFor(STATE.loanAmount))}</div>
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-title">Required to process your loan</div>
-              <div class="card-desc">
-                • Identity &amp; KYC verification<br>
-                • Credit bureau report<br>
-                • Loan processing &amp; eNACH auto-debit<br>
-                • Usage analytics (legitimate use, shown for information)
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-title">Your choice</div>
-              <div class="card-desc">
-                • Insurance partner offers<br>
-                • Marketing communications
-              </div>
-            </div>
-            <div style="flex: 1;"></div>
-            <button class="btn" onclick="showConsentModal('combined')">Review &amp; Give Consent</button>
-          </div>
-        `;
-      },
-
       kyc() {
         return `
           <div class="screen-content">
@@ -849,8 +814,16 @@
                 • Government ID validation
               </div>
             </div>
+            ${JOURNEY === "full" ? "" : `
+            <div class="card">
+              <div class="card-desc">
+                <strong>One consent for your whole application:</strong> the consent screen also covers
+                the credit bureau check, loan processing &amp; eNACH, and, if you choose,
+                insurance offers and marketing.
+              </div>
+            </div>`}
             <div style="flex: 1;"></div>
-            <button class="btn" onclick="showConsentModal('kyc')">Grant Consent</button>
+            <button class="btn" onclick="stepConsent('kyc')">Grant Consent</button>
           </div>
         `;
       },
@@ -871,7 +844,7 @@
               </div>
             </div>
             <div style="flex: 1;"></div>
-            <button class="btn" onclick="showConsentModal('bureau')">Authorise Bureau Pull</button>
+            <button class="btn" onclick="stepConsent('bureau')">${stepLabel("Authorise Bureau Pull")}</button>
           </div>
         `;
       },
@@ -892,7 +865,7 @@
               </div>
             </div>
             <div style="flex: 1;"></div>
-            <button class="btn" onclick="showConsentModal('aa')">Pick AA &amp; Authorise</button>
+            <button class="btn" onclick="stepConsent('aa')">${stepLabel("Pick AA &amp; Authorise")}</button>
             <button class="link" onclick="goTo('loan')">Skip — I'll upload statements manually</button>
           </div>
         `;
@@ -924,7 +897,7 @@
               </div>
             </div>
             <div style="flex: 1;"></div>
-            <button class="btn" onclick="showConsentModal('loan')">Proceed to eNACH</button>
+            <button class="btn" onclick="stepConsent('loan')">${stepLabel("Proceed to eNACH")}</button>
           </div>
         `;
       },
@@ -936,7 +909,7 @@
             <p class="section-desc">Optional insurance coverage</p>
 
             ${PRODUCT.insurancePlans.map(plan => `
-            <div class="plan-card" onclick="showConsentModal('insurance')">
+            <div class="plan-card" onclick="stepConsent('insurance')">
               <div class="plan-name">${escapeHtml(plan.name)}</div>
               <div class="plan-price">${NbfcBrand.formatInr(plan.monthlyPrice)}/month</div>
               <div class="plan-features">
@@ -1056,7 +1029,7 @@
               </div>
             </div>
             <div style="flex: 1;"></div>
-            <button class="btn" onclick="goTo(JOURNEYS[JOURNEY].afterRights)">${JOURNEY === "full" ? "Continue to Communications" : "Continue"}</button>
+            <button class="btn" onclick="goTo('marketing')">Continue to Communications</button>
           </div>
         `;
       },
@@ -1092,7 +1065,7 @@
             </div>
 
             <div style="flex: 1;"></div>
-            <button class="btn" onclick="showConsentModal('marketing')">Allow All</button>
+            <button class="btn" onclick="stepConsent('marketing')">${stepLabel("Allow All")}</button>
             <button class="link" onclick="goTo('finish')">Not Now</button>
           </div>
         `;
@@ -1170,7 +1143,6 @@
         age: "Get Started",
         register: "Create Account",
         otp: "Verify Phone",
-        application: "Loan Application",
         kyc: "Identity Verification",
         loan: "Loan Details",
         insurance: "Loan Protection",
@@ -1216,24 +1188,13 @@
     }
 
     // ====== Journey Bar ======
-    // Index of the journey-bar step the current screen belongs to (combined
-    // journey only), or -1 before the first step.
-    function currentStepIndex() {
-      const stepOf = JOURNEYS[JOURNEY].stepOf;
-      for (let i = ORDER.indexOf(STATE.currentScreen); i >= 0; i--) {
-        if (stepOf[ORDER[i]]) return STEPS.indexOf(stepOf[ORDER[i]]);
-      }
-      return -1;
-    }
-
     function renderJBar() {
       const si = ORDER.indexOf(STATE.currentScreen);
       const jbar = document.getElementById("jbar");
-      const stepIdx = JOURNEYS[JOURNEY].stepOf ? currentStepIndex() : null;
 
       jbar.innerHTML = STEPS.map((id, i) => {
-        const done = stepIdx === null ? si > STEPS.indexOf(id) + 1 : i < stepIdx;
-        const active = stepIdx === null ? si === STEPS.indexOf(id) + 1 : i === stepIdx;
+        const done = si > STEPS.indexOf(id) + 1;
+        const active = si === STEPS.indexOf(id) + 1;
         const stepNum = i + 1;
 
         return `
@@ -1432,7 +1393,7 @@
         await linkPendingConsent();
         await linkCookieBannerSession();
 
-        goTo(JOURNEYS[JOURNEY].afterOtp);
+        goTo("kyc");
       } catch (err) {
         alert("Error: " + err.message);
       }
@@ -1537,18 +1498,8 @@
     }
 
     function setupConsentModalListeners(modal) {
-      // Per-screen "what comes next" map. Shared between the granted
-      // and rejected handlers so we never drift between the two.
-      const NEXT_SCREEN = {
-        "registration-notice": "otp",
-        kyc: "bureau",
-        bureau: "aa",
-        aa: "loan",
-        loan: "insurance",
-        insurance: "processing",
-        marketing: "artifacts",
-        application: "processing"
-      };
+      // NEXT_SCREEN (top of the script) is shared between the granted and
+      // rejected handlers so we never drift between the two.
 
       // Principal accepted → always advance. User intent was positive;
       // mandatory vs optional composition doesn't matter here.
