@@ -23,6 +23,13 @@
     production: {
       API_BASE: "https://api.e-sahamati.com/api/v1",
       CONSENT_UI: "https://consent.e-sahamati.com",
+      // The index.html consent profiles (nbfc-sign-in-consent,
+      // nbfc-application-consent) exist on staging only; production uses the
+      // existing QuickLend profiles for the same two screens.
+      PROFILE_CODES: {
+        signin: "account-registration",
+        application: "loan-application-consent",
+      },
     },
   };
 
@@ -49,7 +56,8 @@
     // on the deployed QuickLend demo.
     JOURNEY: "combined",
 
-    PROFILE_CODES: {},
+    // Consent profile per screen; ENVIRONMENTS[...].PROFILE_CODES fills it.
+    PROFILE_CODES: Object.assign({}, ENVIRONMENTS[ENVIRONMENT].PROFILE_CODES),
     DEMO_ACCOUNTS: null,
   };
 })();

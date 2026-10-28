@@ -591,8 +591,8 @@
     };
 
     // ====== Journey ======
-    //   welcome → [consent 1: account-registration] → mobile → otp
-    //   → application → [consent 2: loan-application-consent] → details (Step 1)
+    //   welcome → [consent 1: nbfc-sign-in-consent] → mobile → otp
+    //   → application → [consent 2: nbfc-application-consent] → details (Step 1)
     //   → offer (Step 2) → applied (Step 3) → artifacts
     const ORDER = ["welcome", "mobile", "otp", "application", "details", "offer", "applied", "artifacts"];
     const BACK = { mobile: "welcome", otp: "mobile", details: "application", offer: "details", artifacts: "applied" };
@@ -710,7 +710,7 @@
                 <li><span class="tick">${icon("check", "", 12)}</span> Paperless KYC, no branch visit</li>
                 <li><span class="tick">${icon("check", "", 12)}</span> Funds in ${escapeHtml(PRODUCT.payoutTime)}</li>
               </ul>
-              <button class="btn" onclick="showConsentModal('registration')">Get Started</button>
+              <button class="btn" onclick="showConsentModal('signin')">Get Started</button>
               ${footerLinks()}
             </div>
           </div>`;
@@ -782,23 +782,21 @@
               <p class="form-sub">Signed in as <strong>${escapeHtml(STATE.name || "+91 " + maskedPhone())}</strong>.
                 One consent covers everything we need for your application.</p>
               <div class="card">
-                <div class="card-title">Required to process your loan</div>
+                <div class="card-title">Required to assess your loan</div>
                 <div class="card-desc">
-                  • Identity &amp; KYC verification<br>
-                  • Credit bureau report<br>
-                  • Loan processing &amp; eNACH auto-debit<br>
-                  • Usage analytics (legitimate use, shown for information)
+                  • Loan amount, monthly income, salary date, loan purpose and tenure<br>
+                  • Email, residence address, state, city and PIN code<br>
+                  • Employment type, company name and office address
                 </div>
               </div>
               <div class="card">
                 <div class="card-title">Your choice</div>
                 <div class="card-desc">
-                  • Bank statements via Account Aggregator<br>
-                  • Insurance partner offers<br>
-                  • Marketing communications
+                  • Offers by email<br>
+                  • Loan protection offers from insurance partners
                 </div>
               </div>
-              <button class="btn" onclick="showConsentModal('combined')">Review &amp; Give Consent</button>
+              <button class="btn" onclick="showConsentModal('application')">Review &amp; Give Consent</button>
             </div>
           </div>`;
       },
@@ -857,8 +855,8 @@
             <div class="form-card">
               <div id="checks" style="${STATE.offerReady ? "display: none;" : ""}">
                 <h3 class="form-title">Checking your eligibility</h3>
-                <p class="form-sub">Using the consent you just gave.</p>
-                ${["Verifying identity (KYC)", "Checking credit bureau", "Fetching bank statements via AA"].map((label, i) => `
+                <p class="form-sub">Using the details you shared, as you consented.</p>
+                ${["Assessing income &amp; employment", "Verifying contact &amp; address", "Preparing your offer"].map((label, i) => `
                   <div class="check-step">
                     <div class="check-ind ${i === 0 ? "spinning" : ""}" id="check-${i}"></div>
                     <div class="check-label">${label}</div>
@@ -1267,11 +1265,13 @@
 
     // ====== Consent screens ======
     function showConsentModal(profileCode) {
-      // QuickLend's published profiles; config/env.js PROFILE_CODES overrides
-      // individual steps for an organisation whose profiles are named differently.
+      // The two consent screens of this journey (created on staging for it);
+      // config/env.js PROFILE_CODES overrides them per environment.
+      //   signin:      before the mobile number (OTP, updates, mobile offers)
+      //   application: before Step 1 (the details Steps 1-2 collect, optional offers)
       const profileMap = Object.assign({
-        registration: "account-registration",
-        combined: "loan-application-consent"
+        signin: "nbfc-sign-in-consent",
+        application: "nbfc-application-consent"
       }, __CFG.PROFILE_CODES || {});
 
       const code = profileMap[profileCode] || profileCode;

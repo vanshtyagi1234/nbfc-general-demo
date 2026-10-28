@@ -11,7 +11,7 @@ every consent, OTP and data-rights call goes to e-Sahamati.
 
 | Page | What it shows |
 |---|---|
-| `index.html` | The main demo: a login-first loan application with **two consent screens**. Welcome → consent 1 (`account-registration`) → sign in (pick a demo customer, OTP `123456`) → consent 2 (`loan-application-consent`, covers everything after) → Step 1 of 3 "Tell us about yourself" → Step 2 eligibility checks and loan offer → Step 3 application submitted, with consent certificates and data-rights links |
+| `index.html` | The main demo: a login-first loan application with **two consent screens**. Welcome → consent 1 (`nbfc-sign-in-consent`: the mobile number) → sign in (pick a demo customer, OTP `123456`) → consent 2 (`nbfc-application-consent`: everything Steps 1-2 ask for) → Step 1 of 3 "Tell us about yourself" → Step 2 eligibility checks and loan offer → Step 3 application submitted, with consent certificates and data-rights links |
 | `classic.html` | The earlier QuickLend-style journey (age check, notice, sign-up, OTP, KYC, credit bureau, AA, loan, insurance, approval, rights, marketing). `JOURNEY: "combined"` opens two consent screens, `"full"` seven, as on demo.e-sahamati.com |
 | `dpo.html` | The journey on the left with a live DPO compliance monitor on the right (consent ledger, data-rights shortcuts, S.6 checklist) |
 | `cookie-banner-demo.html` | The cookie banner on its own, with tag gating and an event log |
@@ -91,7 +91,44 @@ colours to the deployed QuickLend demo's values, because the production org's ow
 branding differs from it. Values in `brand.js` win over the org, so clear those
 fields before relying on the admin console to rebrand the demo pages.
 
-## The combined consent profile
+## The index.html consent screens (staging)
+
+Each screen asks consent for the data collected after it, and only that data. Created
+on staging (`org-quicklend-001`) through the admin API on 2026-10-28, linked to
+`notice-001`; nothing existing was edited, so the deployed QuickLend demos are
+unaffected.
+
+**Consent 1, before the mobile number: `nbfc-sign-in-consent`**
+
+| Purpose | Data fields | |
+|---|---|---|
+| `nbfc_mobile_otp_verification` Mobile Number Verification | Mobile Number | Required |
+| `nbfc_application_updates` Application Updates (SMS, WhatsApp) | Mobile Number | Required |
+| `nbfc_mobile_offers` Offers on Your Mobile (SMS, WhatsApp, calls, RCS) | Mobile Number | Optional |
+
+**Consent 2, before Step 1: `nbfc-application-consent`**
+
+| Purpose | Data fields | |
+|---|---|---|
+| `nbfc_loan_eligibility` Loan Eligibility and Offer | Loan Amount, Monthly Income, Salary Date, Loan Purpose, Tenure | Required |
+| `nbfc_contact_address` Contact and Address Verification | Email Address, Residential Address, State, City, PIN Code | Required |
+| `nbfc_employment_details` Employment Details | Employment Type, Employer Name, Office Address | Required |
+| `nbfc_email_offers` Offers by Email | Email Address | Optional |
+| `nbfc_loan_protection_offers` Loan Protection Offers (insurance partners) | Mobile Number, Loan Amount, Tenure | Optional |
+
+All are consent-based; required ones are retained "5 years after the loan is closed",
+optional ones "until you withdraw consent". Seven org data fields were added for them
+(Monthly Income, Salary Date, Loan Purpose, State, City, Employment Type, Office
+Address), and publishing each purpose created a draft RoPA in the admin console
+(Records of Processing), to be reviewed and activated there. Edit the wording in the
+staging admin console (Consent → Registry for purposes, Profiles for the screens); a
+change can take up to a minute to reach the consent screen (consent UI caching).
+
+Production has none of these: with `ENVIRONMENT = "production"`, `config/env.js` points
+the two screens at the existing `account-registration` and `loan-application-consent`
+profiles instead.
+
+## The combined consent profile (classic.html)
 
 The second consent screen (`index.html`, and `classic.html` in `combined` mode) opens the
 consent profile `loan-application-consent` on
