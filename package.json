@@ -6,6 +6,7 @@
   "scripts": {
     "start": "npx http-server . -p 8000 -c-1 -o /index.html",
     "start:dpo": "npx http-server . -p 8000 -c-1 -o /dpo.html",
+    "start:classic": "npx http-server . -p 8000 -c-1 -o /classic.html",
     "serve": "npx http-server . -p 8000 -c-1"
   }
 }

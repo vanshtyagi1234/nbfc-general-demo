@@ -64,6 +64,12 @@ window.NBFC_BRAND = {
     interestRate: 11.5,    // % per annum
     emi: null,             // monthly EMI in rupees; null = calculated from the above
     payoutTime: "2 hours", // "Funds to arrive in ..."
+    // Step 1 "Loan purpose" choices, Step 2 tenure chips (months), processing fee
+    // (% of the approved amount) and the eligibility cap (monthly income x this).
+    loanPurposes: ["Medical emergency", "Home renovation", "Education", "Wedding", "Travel", "Debt consolidation", "Other"],
+    tenureOptions: [6, 12, 24, 36],
+    processingFeePercent: 2,
+    incomeMultiple: 10,
     insurancePlans: [
       { name: "Basic Protection", monthlyPrice: 99, features: ["Loss of income coverage", "Disability coverage"] },
       {

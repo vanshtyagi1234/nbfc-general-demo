@@ -11,8 +11,9 @@ every consent, OTP and data-rights call goes to e-Sahamati.
 
 | Page | What it shows |
 |---|---|
-| `index.html` | The main demo: a phone-style loan journey (age check, privacy notice, sign-up, OTP, KYC, credit bureau, account aggregator, loan, insurance, approval, data rights, marketing, consent certificates). By default it opens two consent screens (`JOURNEY: "combined"`): the registration notice before sign-up, and one combined screen on the KYC step; the later steps show as usual and move on without another consent screen. `JOURNEY: "full"` opens seven, one per step, as on demo.e-sahamati.com |
-| `dpo.html` | The same journey on the left with a live DPO compliance monitor on the right (consent ledger, data-rights shortcuts, S.6 checklist) |
+| `index.html` | The main demo: a login-first loan application with **two consent screens**. Welcome → consent 1 (`account-registration`) → sign in (pick a demo customer, OTP `123456`) → consent 2 (`loan-application-consent`, covers everything after) → Step 1 of 3 "Tell us about yourself" → Step 2 eligibility checks and loan offer → Step 3 application submitted, with consent certificates and data-rights links |
+| `classic.html` | The earlier QuickLend-style journey (age check, notice, sign-up, OTP, KYC, credit bureau, AA, loan, insurance, approval, rights, marketing). `JOURNEY: "combined"` opens two consent screens, `"full"` seven, as on demo.e-sahamati.com |
+| `dpo.html` | The journey on the left with a live DPO compliance monitor on the right (consent ledger, data-rights shortcuts, S.6 checklist) |
 | `cookie-banner-demo.html` | The cookie banner on its own, with tag gating and an event log |
 
 ## Run it
@@ -46,7 +47,25 @@ To run against a local e-Sahamati instead (`npm run dev` in the e-sahamati repo:
 `localhost:4000`, consent UI on `localhost:3000`), copy `config/env.example.js` over
 `config/env.js` and do not commit that change.
 
-Demo sign-in: pick a demo account on the sign-up screen, OTP `123456`.
+Demo sign-in: pick a demo customer on the sign-in screen, OTP `123456`.
+
+### Which mobile numbers can sign in
+
+Only numbers that are already data principals of `org-quicklend-001`. The static code
+`123456` is accepted for every principal of a demo-allowlisted org, but for an unknown
+number the API answers "sent" without storing a code (so nobody can probe which numbers
+are customers), and the OTP then fails; the page says to use a demo customer. A static
+page cannot create principals (that needs an admin login or a token exchange signed by
+the lender's own backend), so:
+
+- the sign-in screen lists the seeded customers (Priya, Rahul, Anjali; `DEMO_ACCOUNTS` in
+  `config/env.js` replaces them);
+- any other number works once an admin adds it as a data principal in that
+  environment's admin console (Principals), e.g. a presenter's own number;
+- open sign-up for any number would need a small backend acting as the lender's server.
+
+The Step 1 and Step 2 answers stay in the page: e-Sahamati records consents, not loan
+applications, so nothing from the form is sent.
 
 ## Before each demo
 
@@ -74,7 +93,8 @@ fields before relying on the admin console to rebrand the demo pages.
 
 ## The combined consent profile
 
-The two-screen journey opens the consent profile `loan-application-consent` on
+The second consent screen (`index.html`, and `classic.html` in `combined` mode) opens the
+consent profile `loan-application-consent` on
 `org-quicklend-001`, created 2026-10-28 through the admin API in BOTH environments and
 linked to the org's notice `notice-001`. Its purposes differ by one, because the two
 pre-sign-up profiles (`account-registration`) differ:
@@ -124,7 +144,7 @@ local-dev values; the pages fall back to those if `config/env.js` is missing.
 | `CONSENT_UI` | `http://localhost:3000` | Consent UI origin, no trailing slash |
 | `SDK_URL` | `{CONSENT_UI}/sdk/esahamati.0.4.1.min.js` | Consent SDK bundle |
 | `COOKIE_BANNER_URL` | `{CONSENT_UI}/sdk/cookie-banner.0.2.8.min.js` | Cookie banner bundle |
-| `JOURNEY` | `combined` | Same journey steps either way. `combined`: two consent screens on `index.html` (notice, then one on KYC). `full`: seven, as on demo.e-sahamati.com |
+| `JOURNEY` | `combined` | `classic.html` only (`index.html` always uses two consent screens). `combined`: two (notice, then one on KYC). `full`: seven, as on demo.e-sahamati.com |
 | `PROFILE_CODES` | QuickLend's profiles | Consent profile per step (`registration`, `combined`, `kyc`, `bureau`, `aa`, `loan`, `insurance`, `marketing`, and `credit` on `dpo.html`). Set only the ones that differ |
 | `DEMO_ACCOUNTS` | QuickLend's seeded principals | `[{ name, phone, dob }]` shown on the sign-up screen. They must exist in `ORG_ID` |
 
@@ -162,7 +182,11 @@ should differ from what e-Sahamati shows.
 | `product.amount`, `minAmount`, `maxAmount`, `amountStep` | 2,50,000 / 50,000 / 10,00,000 / 10,000 | Welcome slider; the chosen amount carries through the journey |
 | `product.tenureMonths`, `interestRate` | 24 / 11.5 | Loan details screen |
 | `product.emi` | Calculated | Fix the EMI shown for the starting amount |
-| `product.payoutTime` | `2 hours` | Approval screen |
+| `product.payoutTime` | `2 hours` | Welcome and Step 3 screens |
+| `product.loanPurposes` | Medical emergency, Home renovation, … | Step 1 "Loan purpose" choices |
+| `product.tenureOptions` | 6 / 12 / 24 / 36 | Step 2 tenure chips (months) |
+| `product.processingFeePercent` | 2 | Step 2 fee and "amount credited" |
+| `product.incomeMultiple` | 10 | Step 2 offer cap: monthly income × this (and never above `maxAmount`) |
 | `product.insurancePlans` | Basic Protection (₹99), Comprehensive (₹199) | Insurance screen: `[{ name, monthlyPrice, features: [] }]` |
 
 Colours are `#RRGGBB`. Hover, tint, glow and gradient shades are derived from them.

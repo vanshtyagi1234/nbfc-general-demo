@@ -34,6 +34,10 @@
     interestRate: 11.5,
     emi: null,
     payoutTime: "2 hours",
+    loanPurposes: ["Medical emergency", "Home renovation", "Education", "Wedding", "Travel", "Debt consolidation", "Other"],
+    tenureOptions: [6, 12, 24, 36],
+    processingFeePercent: 2,
+    incomeMultiple: 10,
     insurancePlans: [
       { name: "Basic Protection", monthlyPrice: 99, features: ["Loss of income coverage", "Disability coverage"] },
       {
@@ -141,6 +145,12 @@
       interestRate: positive(p.interestRate, d.interestRate),
       emi: positive(p.emi, null),
       payoutTime: first(text(p.payoutTime), d.payoutTime),
+      loanPurposes: Object.freeze((Array.isArray(p.loanPurposes) && p.loanPurposes.length ? p.loanPurposes : d.loanPurposes)
+        .map(text).filter(Boolean)),
+      tenureOptions: Object.freeze((Array.isArray(p.tenureOptions) && p.tenureOptions.length ? p.tenureOptions : d.tenureOptions)
+        .map(function (n) { return Math.round(positive(n, 0)); }).filter(Boolean)),
+      processingFeePercent: p.processingFeePercent === 0 ? 0 : positive(p.processingFeePercent, d.processingFeePercent),
+      incomeMultiple: positive(p.incomeMultiple, d.incomeMultiple),
       insurancePlans: Object.freeze(plans.filter(function (plan) { return plan && text(plan.name); }).map(function (plan) {
         return Object.freeze({
           name: text(plan.name),
@@ -152,10 +162,10 @@
   }
 
   // Standard reducing-balance EMI, or the configured figure when one is set.
-  function emiFor(amount) {
-    if (product.emi && amount === product.amount) return product.emi;
+  function emiFor(amount, tenureMonths) {
+    var n = Math.round(positive(tenureMonths, product.tenureMonths));
+    if (product.emi && amount === product.amount && n === product.tenureMonths) return product.emi;
     var r = product.interestRate / 12 / 100;
-    var n = product.tenureMonths;
     var factor = Math.pow(1 + r, n);
     return Math.round((amount * r * factor) / (factor - 1));
   }
