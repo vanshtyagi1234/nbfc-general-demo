@@ -6,7 +6,12 @@
 //      Settings -> Branding / General), when useOrgBranding is true,
 //   3. the built-in QuickLend default.
 //
-// So the usual way to rebrand before a demo is to change the organisation in the
+// The name and colour fields below are currently pinned to the deployed QuickLend
+// demo (https://demo.e-sahamati.com), because the production org's own branding
+// differs (name "QuickLend Finance Ltd.", secondary colour #1D4ED8). Clear them to
+// let the organisation drive the demo again.
+//
+// The usual way to rebrand before a demo is to change the organisation in the
 // admin console and leave these fields empty. The same change then shows up in the
 // consent pop-up, the privacy notice, the cookie banner and the consent-ui pages,
 // which e-Sahamati renders from the organisation itself. Set a field here only to
@@ -18,10 +23,10 @@ window.NBFC_BRAND = {
 
   // Short name: app bar, welcome heading, page title. Default: the organisation's
   // name without a trailing "Ltd." / "Limited" / "Pvt. Ltd.".
-  shortName: "",
+  shortName: "QuickLend",
 
   // Full name: the header on dpo.html. Default: the organisation's name.
-  fullName: "",
+  fullName: "QuickLend Finance",
 
   // Line under the name on the welcome screen.
   tagline: "",
@@ -44,9 +49,9 @@ window.NBFC_BRAND = {
 
   // Colours as #RRGGBB. Hover states, tints, glows and the background gradient
   // are derived from these, so two or three values restyle the whole demo.
-  primaryColor: "",    // buttons, logo tile, active step
-  secondaryColor: "",  // headings, amounts, background gradient, phone frame
-  accentColor: "",     // focus rings, step glow, scrollbar. Default: primary
+  primaryColor: "#2563EB",    // buttons, logo tile, active step
+  secondaryColor: "#1A2B5F",  // headings, amounts, background gradient, phone frame
+  accentColor: "#0EA5E9",     // focus rings, step glow, scrollbar. Default: primary
 
   // Loan product shown in the journey. Leave a field out to keep the default.
   product: {

@@ -58,6 +58,11 @@ org). The demo pages read the same values at load time.
 Then reload the demo. The logo must be a public `https://` URL, because it is served to
 every visitor.
 
+**Currently pinned:** `config/brand.js` sets `shortName`, `fullName` and the three
+colours to the deployed QuickLend demo's values, because the production org's own
+branding differs from it. Values in `brand.js` win over the org, so clear those
+fields before relying on the admin console to rebrand the demo pages.
+
 ## Configuration
 
 Two files, both plain JavaScript loaded before the page scripts.
