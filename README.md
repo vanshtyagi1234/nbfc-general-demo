@@ -17,17 +17,26 @@ every consent, OTP and data-rights call goes to e-Sahamati.
 
 ## Run it
 
-The committed `config/env.js` points at production e-Sahamati
-(`api.e-sahamati.com` / `consent.e-sahamati.com`, org `org-quicklend-001`, the same
-values as the live QuickLend demo at demo.e-sahamati.com). So the demo works with
-nothing running locally:
+The committed `config/env.js` targets a deployed e-Sahamati, chosen by its `ENVIRONMENT`
+setting (org `org-quicklend-001` in both):
+
+| `ENVIRONMENT` | API / consent UI | Admin console | Accepts calls from |
+|---|---|---|---|
+| `"staging"` (default) | `api.staging.datarakshaq.com` / `consent.staging.datarakshaq.com` | https://admin.staging.datarakshaq.com | GitHub Pages and `localhost:8000` |
+| `"production"` | `api.e-sahamati.com` / `consent.e-sahamati.com` | https://admin.e-sahamati.com | `localhost:8000` only |
+
+The values are the ones each deployment's own QuickLend demo uses
+(demo.staging.datarakshaq.com / demo.e-sahamati.com). So the demo works with nothing
+running locally:
 
 ```bash
 npm start      # serves on http://localhost:8000 and opens index.html
 ```
 
 `npm run start:dpo` opens `dpo.html`. Use port 8000: e-Sahamati's CORS allow-list
-includes `http://localhost:8000`.
+includes `http://localhost:8000`. The GitHub Pages copy
+(https://vanshtyagi1234.github.io/nbfc-general-demo/) works with `"staging"` only:
+production's API refuses the sign-in calls from github.io (see "Deploying").
 
 Do not open the HTML files directly from disk (`file://`). The consent UI refuses to
 be framed by a `file://` page and the API rejects its `null` origin, so the consent
@@ -53,7 +62,7 @@ org). The demo pages read the same values at load time.
 | Logo, primary and secondary colour | Settings → Branding | Demo pages, consent pop-up, cookie banner (primary colour) |
 | Grievance Officer and DPO contacts | Employees → Officers | Consent pop-up, notice, grievance page |
 | Privacy notice text | Notices: edit, then publish a new version | Consent pop-up, data-access page. The seeded QuickLend notice names "QuickLend Finance Ltd." and its grievance officer in the text itself |
-| Allowed origins (hosted demo only) | Settings → Integration → Allowed Origins | Lets a browser on the demo's domain call the API |
+| Allowed origins (hosted demo only) | Settings → Integration → Allowed Origins | The cookie banner and pending-consent calls from the demo's domain. Sign-in also needs the API server's own allow-list (see "Deploying") |
 
 Then reload the demo. The logo must be a public `https://` URL, because it is served to
 every visitor.
@@ -66,15 +75,19 @@ fields before relying on the admin console to rebrand the demo pages.
 ## The combined consent profile
 
 The two-screen journey opens the consent profile `loan-application-consent` on
-`org-quicklend-001` (created 2026-10-28 through the admin API). It lists `kyc`,
-`credit_scoring`, `loan_processing`, `third_party_sharing`, `marketing` and
-`analytics`, and links the org's only notice, `notice-001`. `account_aggregator` is
-left out because the pre-sign-up profile (`account-registration`) already asks for it.
+`org-quicklend-001`, created 2026-10-28 through the admin API in BOTH environments and
+linked to the org's notice `notice-001`. Its purposes differ by one, because the two
+pre-sign-up profiles (`account-registration`) differ:
 
-It is a separate profile, so the deployed QuickLend demo (demo.e-sahamati.com), which
-uses the seven per-step profiles, is not affected. Do not edit those seven profiles or
-publish a new version of `notice-001` for this demo: both change what the deployed demo
-shows. To change the combined screen, edit `loan-application-consent` in the admin
+| Environment | `loan-application-consent` purposes | Why |
+|---|---|---|
+| staging | `kyc`, `credit_scoring`, `account_aggregator`, `loan_processing`, `third_party_sharing`, `marketing`, `analytics` | Staging's `account-registration` (v2) does not ask for `account_aggregator` |
+| production | `kyc`, `credit_scoring`, `loan_processing`, `third_party_sharing`, `marketing`, `analytics` | Production's `account-registration` (v5) already asks for `account_aggregator` |
+
+It is a separate profile, so each deployment's own QuickLend demo, which uses the seven
+per-step profiles, is not affected. Do not edit those seven profiles or publish a new
+version of `notice-001` for this demo: both change what the deployed demos show. To
+change the combined screen, edit `loan-application-consent` in that environment's admin
 console (Consent Profiles).
 
 ### Every consent goes through Pending, then Linked
@@ -89,8 +102,9 @@ Why: the consent UI stores any token it is given in its own browser storage for 
 24 hours and restores it on every later open. After one signed-in step, the next run's
 privacy notice was recorded directly for the previous person (`/consent/grant`) and never
 appeared under Pending or Linked. A browser that ran an older version of this demo may
-still hold such a session: clear site data for consent.e-sahamati.com, or use a private
-window, once.
+still hold such a session: clear site data for the consent UI's site
+(consent.staging.datarakshaq.com or consent.e-sahamati.com), or use a private window,
+once.
 
 ## Configuration
 
@@ -98,11 +112,13 @@ Two files, both plain JavaScript loaded before the page scripts.
 
 ### `config/env.js`: which deployment and organisation
 
-Committed with the production values. `config/env.example.js` lists every key with the
+Committed. Set `ENVIRONMENT` at the top to `"staging"` or `"production"`; the file fills
+`API_BASE` and `CONSENT_UI` from it. `config/env.example.js` lists every key with the
 local-dev values; the pages fall back to those if `config/env.js` is missing.
 
 | Key | Default | Purpose |
 |---|---|---|
+| `ENVIRONMENT` | `"staging"` | Which deployment: `"staging"` or `"production"` (an unknown name stops the page with an error naming the valid ones) |
 | `ORG_ID` | `org-quicklend-001` | The organisation every call is made against |
 | `API_BASE` | `http://localhost:4000/api/v1` | e-Sahamati API, including `/api/v1` |
 | `CONSENT_UI` | `http://localhost:3000` | Consent UI origin, no trailing slash |
@@ -158,11 +174,13 @@ used.
 Any static host works (nginx, S3 with CloudFront, Netlify, ...):
 
 1. Upload the repo contents (`config/env.example.js` is not needed).
-2. `config/env.js` already targets production e-Sahamati; edit it only for another
-   environment.
-3. Add the demo's origin (e.g. `https://nbfc-demo.example.com`) to the organisation's
-   allowed origins (Settings → Integration), or to `ALLOWED_ORIGINS` on the e-Sahamati
-   API. Without it, the browser blocks every API call.
+2. Set `ENVIRONMENT` in `config/env.js` (`"staging"` or `"production"`).
+3. Make sure that environment's API accepts the demo's origin. Sign-in
+   (`/auth/otp/send`, `/auth/otp/verify`) and certificate download are only opened by
+   the API server's own allow-list (`ALLOWED_ORIGINS` in its environment, a change for
+   whoever runs that server). An organisation's Allowed Origins (Settings → Integration)
+   opens only the cookie-banner and pending-consent routes, so it is not enough on its
+   own. Staging already accepts `https://vanshtyagi1234.github.io`; production does not.
 
 `robots.txt` and the pages' `noindex` meta keep the demo out of search engines.
 

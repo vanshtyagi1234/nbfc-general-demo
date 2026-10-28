@@ -1,9 +1,10 @@
 // Environment config: which e-Sahamati deployment and organisation the demo talks to.
 //
 // Reference for config/env.js, which every page loads before its own script. The
-// committed config/env.js points at production; copy this file over it to run against
-// the local dev stack (backend on localhost:4000, consent-ui on localhost:3000), and
-// do not commit that. If config/env.js is missing, the pages fall back to these values.
+// committed config/env.js picks staging or production through its ENVIRONMENT setting;
+// copy this file over it to run against the local dev stack (backend on localhost:4000,
+// consent-ui on localhost:3000), and do not commit that. If config/env.js is missing,
+// the pages fall back to these values.
 //
 // Branding (name, logo, colours, loan figures) lives in config/brand.js, not here.
 
@@ -14,13 +15,15 @@ window.DEMO_CONFIG = {
 
   // Backend API base, including the /api/v1 suffix.
   //   dev:   "http://localhost:4000/api/v1"
-  //   prod:  "https://api.e-sahamati.com/api/v1"
+  //   prod:     "https://api.e-sahamati.com/api/v1"
+  //   staging:  "https://api.staging.datarakshaq.com/api/v1"
   API_BASE: "http://localhost:4000/api/v1",
 
   // Consent UI origin, no trailing slash. The consent pop-up iframe and the
   // data-rights links open {CONSENT_UI}/{ORG_ID}/{page}.
   //   dev:   "http://localhost:3000"
-  //   prod:  "https://consent.e-sahamati.com"
+  //   prod:     "https://consent.e-sahamati.com"
+  //   staging:  "https://consent.staging.datarakshaq.com"
   CONSENT_UI: "http://localhost:3000",
 
   // SDK bundles. Leave empty to load the version-pinned bundles the consent UI
