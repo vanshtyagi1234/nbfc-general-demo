@@ -116,10 +116,31 @@ unaffected.
 | `nbfc_email_offers` Offers by Email | Email Address | Optional |
 | `nbfc_loan_protection_offers` Loan Protection Offers (insurance partners) | Mobile Number, Loan Amount, Tenure | Optional |
 
+**Third parties** (added 2026-10-28 as version 2 of each purpose, `<code>_v2`; version 1
+archived). Both profiles were then republished (version 2) to list the `_v2` codes: the
+consent screen filters by the codes a profile stores, so a profile still naming an
+archived code shows an empty screen even though the API falls forward to the newer
+version. Repeat that step whenever a purpose here gets a new version. App connectors on
+the platform (Vendors → Connectors) come first:
+
+| Purpose | Third parties |
+|---|---|
+| Mobile Number Verification | MSG91 (OTP SMS) |
+| Application Updates | MSG91 (SMS), Gupshup (WhatsApp) |
+| Offers on Your Mobile | CleverTap (connector: SMS/WhatsApp campaigns, India data region), LeadSquared (connector: CRM calls/SMS) |
+| Loan Eligibility and Offer | AWS ap-south-1 Mumbai (hosting) |
+| Contact and Address Verification | AWS Mumbai, Google Maps Platform (address/PIN check) |
+| Employment Details | AWS Mumbai, IDfy (employment verification) |
+| Offers by Email | Resend (connector, enabled on staging; Resend, Inc., US, so shown as a transfer outside India) |
+| Loan Protection Offers | Insurance Partner (Credit-Life), a generic entry rather than a named insurer |
+
+CleverTap, LeadSquared, Resend and the insurer were added as the org's own third parties
+(Vendors → Third Parties); the others come from the platform library.
+
 All are consent-based; required ones are retained "5 years after the loan is closed",
 optional ones "until you withdraw consent". Seven org data fields were added for them
 (Monthly Income, Salary Date, Loan Purpose, State, City, Employment Type, Office
-Address), and publishing each purpose created a draft RoPA in the admin console
+Address), and publishing each purpose (and each version 2) created a draft RoPA in the admin console
 (Records of Processing), to be reviewed and activated there. Edit the wording in the
 staging admin console (Consent → Registry for purposes, Profiles for the screens); a
 change can take up to a minute to reach the consent screen (consent UI caching).
