@@ -15,6 +15,11 @@ window.DEMO_CONFIG = {
   SDK_URL: "",
   COOKIE_BANNER_URL: "",
 
+  // "combined": two consent screens (registration notice before sign-up, then
+  // loan-application-consent after it). "full": the deployed QuickLend demo's
+  // seven screens.
+  JOURNEY: "combined",
+
   PROFILE_CODES: {},
   DEMO_ACCOUNTS: null,
 };

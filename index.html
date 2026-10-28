@@ -618,14 +618,44 @@
     }
 
     // ====== Journey Bar Config ======
-    // Canonical 8-stage DPDP-aligned loan journey:
+    // config/env.js JOURNEY picks one of two journeys:
+    //
+    // "full" — the QuickLend demo's canonical 8-stage DPDP-aligned journey,
+    // seven consent screens:
     //   age → register → registration-notice → otp → kyc → bureau → aa → loan
     //   → insurance → success → rights → marketing → finish
+    //
+    // "combined" (default) — two consent screens: the registration notice before
+    // sign-up, then ONE screen after sign-up whose profile (PROFILE_CODES.combined)
+    // lists the KYC, bureau, loan, insurance, marketing and analytics purposes:
+    //   age → registration-notice → register → otp → application → processing
+    //   → success → rights → artifacts → finish
+    //
     // Journey bar shows the user-visible milestones; intermediate screens
     // (otp, processing) are not surfaced as steps.
-    const STEPS = ["age", "register", "kyc", "bureau", "aa", "loan", "insurance", "success", "rights"];
-    const STEP_LABELS = ["Age", "Sign-up", "KYC", "Bureau", "AA", "Loan", "Insure", "Approved", "Rights"];
-    const ORDER = ["welcome", "age", "registration-notice", "register", "otp", "kyc", "bureau", "aa", "loan", "insurance", "processing", "success", "rights", "marketing", "artifacts", "finish"];
+    const JOURNEY = __CFG.JOURNEY === "full" ? "full" : "combined";
+    const JOURNEYS = {
+      full: {
+        steps: ["age", "register", "kyc", "bureau", "aa", "loan", "insurance", "success", "rights"],
+        labels: ["Age", "Sign-up", "KYC", "Bureau", "AA", "Loan", "Insure", "Approved", "Rights"],
+        order: ["welcome", "age", "registration-notice", "register", "otp", "kyc", "bureau", "aa", "loan", "insurance", "processing", "success", "rights", "marketing", "artifacts", "finish"],
+        afterOtp: "kyc",
+        afterRights: "marketing"
+      },
+      combined: {
+        steps: ["age", "register", "application", "success", "rights"],
+        labels: ["Age", "Sign-up", "Consent", "Approved", "Rights"],
+        order: ["welcome", "age", "registration-notice", "register", "otp", "application", "processing", "success", "rights", "artifacts", "finish"],
+        afterOtp: "application",
+        afterRights: "artifacts",
+        // Which journey-bar step each screen belongs to; screens not listed take
+        // the step of the screen before them.
+        stepOf: { age: "age", "registration-notice": "register", register: "register", otp: "register", application: "application", success: "success", rights: "rights" }
+      }
+    };
+    const STEPS = JOURNEYS[JOURNEY].steps;
+    const STEP_LABELS = JOURNEYS[JOURNEY].labels;
+    const ORDER = JOURNEYS[JOURNEY].order;
 
     // ====== SVG Icons ======
     function getSvgCheckmark() {
@@ -759,6 +789,46 @@
             <div style="flex: 1;"></div>
             <button class="btn" onclick="showConsentModal('registration')">Open Privacy Notice</button>
             <button class="link" onclick="goTo('age')">Back</button>
+          </div>
+        `;
+      },
+
+      // Combined journey: the one consent screen after sign-up.
+      application() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Your Loan Application</h2>
+            <p class="section-desc">One consent covers everything we need to process your loan</p>
+            <div class="card">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+                <div>
+                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Loan Amount</div>
+                  <div style="font-weight: 600; color: var(--navy);">${NbfcBrand.formatInr(STATE.loanAmount)}</div>
+                </div>
+                <div>
+                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Monthly EMI</div>
+                  <div style="font-weight: 600; color: var(--navy);">${NbfcBrand.formatInr(NbfcBrand.emiFor(STATE.loanAmount))}</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Required to process your loan</div>
+              <div class="card-desc">
+                • Identity &amp; KYC verification<br>
+                • Credit bureau report<br>
+                • Loan processing &amp; eNACH auto-debit<br>
+                • Usage analytics (legitimate use, shown for information)
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Your choice</div>
+              <div class="card-desc">
+                • Insurance partner offers<br>
+                • Marketing communications
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="showConsentModal('combined')">Review &amp; Give Consent</button>
           </div>
         `;
       },
@@ -986,7 +1056,7 @@
               </div>
             </div>
             <div style="flex: 1;"></div>
-            <button class="btn" onclick="goTo('marketing')">Continue to Communications</button>
+            <button class="btn" onclick="goTo(JOURNEYS[JOURNEY].afterRights)">${JOURNEY === "full" ? "Continue to Communications" : "Continue"}</button>
           </div>
         `;
       },
@@ -1100,6 +1170,7 @@
         age: "Get Started",
         register: "Create Account",
         otp: "Verify Phone",
+        application: "Loan Application",
         kyc: "Identity Verification",
         loan: "Loan Details",
         insurance: "Loan Protection",
@@ -1145,13 +1216,24 @@
     }
 
     // ====== Journey Bar ======
+    // Index of the journey-bar step the current screen belongs to (combined
+    // journey only), or -1 before the first step.
+    function currentStepIndex() {
+      const stepOf = JOURNEYS[JOURNEY].stepOf;
+      for (let i = ORDER.indexOf(STATE.currentScreen); i >= 0; i--) {
+        if (stepOf[ORDER[i]]) return STEPS.indexOf(stepOf[ORDER[i]]);
+      }
+      return -1;
+    }
+
     function renderJBar() {
       const si = ORDER.indexOf(STATE.currentScreen);
       const jbar = document.getElementById("jbar");
+      const stepIdx = JOURNEYS[JOURNEY].stepOf ? currentStepIndex() : null;
 
       jbar.innerHTML = STEPS.map((id, i) => {
-        const done = si > STEPS.indexOf(id) + 1;
-        const active = si === STEPS.indexOf(id) + 1;
+        const done = stepIdx === null ? si > STEPS.indexOf(id) + 1 : i < stepIdx;
+        const active = stepIdx === null ? si === STEPS.indexOf(id) + 1 : i === stepIdx;
         const stepNum = i + 1;
 
         return `
@@ -1350,7 +1432,7 @@
         await linkPendingConsent();
         await linkCookieBannerSession();
 
-        goTo("kyc");
+        goTo(JOURNEYS[JOURNEY].afterOtp);
       } catch (err) {
         alert("Error: " + err.message);
       }
@@ -1419,7 +1501,9 @@
         aa: "account-aggregator-fetch",
         loan: "loan-processing-repayment",
         insurance: "insurance-protection-plans",
-        marketing: "marketing-communications"
+        marketing: "marketing-communications",
+        // Combined journey: one profile for every after-sign-up purpose.
+        combined: "loan-application-consent"
       }, __CFG.PROFILE_CODES || {});
 
       const code = profileMap[profileCode] || profileCode;
@@ -1462,7 +1546,8 @@
         aa: "loan",
         loan: "insurance",
         insurance: "processing",
-        marketing: "artifacts"
+        marketing: "artifacts",
+        application: "processing"
       };
 
       // Principal accepted → always advance. User intent was positive;

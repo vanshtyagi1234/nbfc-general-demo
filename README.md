@@ -11,7 +11,7 @@ every consent, OTP and data-rights call goes to e-Sahamati.
 
 | Page | What it shows |
 |---|---|
-| `index.html` | The main demo: a phone-style loan journey (age check, privacy notice, sign-up, OTP, KYC, credit bureau, account aggregator, loan, insurance, approval, data rights, marketing, consent certificates) |
+| `index.html` | The main demo: a phone-style loan journey. By default two consent screens (`JOURNEY: "combined"`): the registration notice before sign-up, then one loan-application screen after it, followed by approval, data rights and consent certificates. `JOURNEY: "full"` gives the deployed QuickLend demo's seven screens (KYC, credit bureau, account aggregator, loan, insurance, marketing each separately) |
 | `dpo.html` | The same journey on the left with a live DPO compliance monitor on the right (consent ledger, data-rights shortcuts, S.6 checklist) |
 | `cookie-banner-demo.html` | The cookie banner on its own, with tag gating and an event log |
 
@@ -63,6 +63,20 @@ colours to the deployed QuickLend demo's values, because the production org's ow
 branding differs from it. Values in `brand.js` win over the org, so clear those
 fields before relying on the admin console to rebrand the demo pages.
 
+## The combined consent profile
+
+The two-screen journey opens the consent profile `loan-application-consent` on
+`org-quicklend-001` (created 2026-10-28 through the admin API). It lists `kyc`,
+`credit_scoring`, `loan_processing`, `third_party_sharing`, `marketing` and
+`analytics`, and links the org's only notice, `notice-001`. `account_aggregator` is
+left out because the pre-sign-up profile (`account-registration`) already asks for it.
+
+It is a separate profile, so the deployed QuickLend demo (demo.e-sahamati.com), which
+uses the seven per-step profiles, is not affected. Do not edit those seven profiles or
+publish a new version of `notice-001` for this demo: both change what the deployed demo
+shows. To change the combined screen, edit `loan-application-consent` in the admin
+console (Consent Profiles).
+
 ## Configuration
 
 Two files, both plain JavaScript loaded before the page scripts.
@@ -79,7 +93,8 @@ local-dev values; the pages fall back to those if `config/env.js` is missing.
 | `CONSENT_UI` | `http://localhost:3000` | Consent UI origin, no trailing slash |
 | `SDK_URL` | `{CONSENT_UI}/sdk/esahamati.0.4.1.min.js` | Consent SDK bundle |
 | `COOKIE_BANNER_URL` | `{CONSENT_UI}/sdk/cookie-banner.0.2.8.min.js` | Cookie banner bundle |
-| `PROFILE_CODES` | QuickLend's profiles | Consent profile per step (`registration`, `kyc`, `bureau`, `aa`, `loan`, `insurance`, `marketing`, and `credit` on `dpo.html`). Set only the ones that differ |
+| `JOURNEY` | `combined` | `combined`: two consent screens on `index.html`. `full`: seven, as on demo.e-sahamati.com |
+| `PROFILE_CODES` | QuickLend's profiles | Consent profile per step (`registration`, `combined`, `kyc`, `bureau`, `aa`, `loan`, `insurance`, `marketing`, and `credit` on `dpo.html`). Set only the ones that differ |
 | `DEMO_ACCOUNTS` | QuickLend's seeded principals | `[{ name, phone, dob }]` shown on the sign-up screen. They must exist in `ORG_ID` |
 
 To point the demo at a different organisation, change `ORG_ID`. If that org's consent

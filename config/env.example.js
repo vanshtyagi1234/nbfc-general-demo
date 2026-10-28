@@ -29,10 +29,18 @@ window.DEMO_CONFIG = {
   SDK_URL: "",
   COOKIE_BANNER_URL: "",
 
+  // Journey on index.html:
+  //   "combined" (default): two consent screens. The registration notice before
+  //              sign-up, then ONE screen after it (PROFILE_CODES.combined) carrying
+  //              every after-sign-up purpose.
+  //   "full":    the QuickLend demo's seven consent screens, one per step.
+  JOURNEY: "combined",
+
   // Optional. Consent profile codes per journey step, for an organisation whose
   // profiles are named differently from QuickLend's. Only the keys you set change.
-  //   registration, kyc, bureau, aa, loan, insurance, marketing  (index.html)
-  //   credit                                                   (dpo.html)
+  //   registration, combined                                   (index.html, combined)
+  //   registration, kyc, bureau, aa, loan, insurance, marketing  (index.html, full)
+  //   kyc, credit, loan, insurance, marketing                  (dpo.html)
   PROFILE_CODES: {},
 
   // Optional. Demo accounts shown on the sign-up screen. They must exist as data
