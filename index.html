@@ -1486,10 +1486,19 @@
       modal.setAttribute("consent-ui-base", CONSENT_UI);
       modal.setAttribute("profile-code", code);
 
-      if (STATE.authToken) {
-        modal.setAttribute("auth-token", STATE.authToken);
-        modal.setAttribute("principal-id", STATE.principalId);
-      }
+      // WHY: consent-ui stores a token it is handed in its own browser storage
+      // and restores it on every later open (up to the token's 24h life). After
+      // one signed-in step, the NEXT run's registration notice therefore records
+      // straight against the previous person via /consent/grant, never as a
+      // pending consent, and revoking the token does not stop it.
+      // DECISION: never hand the pop-up the principal token. Every step records
+      // through the anonymous rail (/consent/pending/grant) and the granted /
+      // rejected handlers below bind it to the signed-in principal with
+      // /consent/pending/link, so it shows under Pending, then Linked.
+      // TRADEOFF: the after-sign-up screens show "not signed in" and the 18+
+      // self-declaration, like the registration notice.
+      modal.removeAttribute("auth-token");
+      modal.removeAttribute("principal-id");
 
       setTimeout(() => {
         modal.open = true;
@@ -1529,11 +1538,11 @@
           setTimeout(() => goTo("register"), 300);
           return;
         }
-        // Authenticated screens (kyc / bureau / loan / insurance / marketing /
-        // …) — the iframe still submits as pending because the SDK doesn't
-        // forward the auth token. Bind the freshly stashed sessionId to the
-        // principal here so the consent shows up in /consent/:principalId
-        // (the artifact-download screen reads from there).
+        // Screens after sign-in (kyc / bureau / loan / insurance / marketing /
+        // …) — the iframe submits as pending because showConsentModal never
+        // hands it the auth token (see the WHY there). Bind the freshly stashed
+        // sessionId to the principal here so the consent shows up in
+        // /consent/:principalId (the artifact-download screen reads from there).
         if (STATE.authToken) {
           try { await linkPendingConsent(); } catch (err) { console.warn(err); }
         }

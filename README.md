@@ -77,6 +77,21 @@ publish a new version of `notice-001` for this demo: both change what the deploy
 shows. To change the combined screen, edit `loan-application-consent` in the admin
 console (Consent Profiles).
 
+### Every consent goes through Pending, then Linked
+
+The demo never hands its signed-in token to the consent pop-up. Every consent screen,
+before or after sign-up, records an anonymous pending consent, and the demo links it to
+the person straight away (`/consent/pending/link`): in the admin console it shows under
+Consent → Pending Consent, moving from Pending to Linked. The after-sign-up screens
+therefore say "You are not signed in" and ask for the 18+ tick, like the notice.
+
+Why: the consent UI stores any token it is given in its own browser storage for up to
+24 hours and restores it on every later open. After one signed-in step, the next run's
+privacy notice was recorded directly for the previous person (`/consent/grant`) and never
+appeared under Pending or Linked. A browser that ran an older version of this demo may
+still hold such a session: clear site data for consent.e-sahamati.com, or use a private
+window, once.
+
 ## Configuration
 
 Two files, both plain JavaScript loaded before the page scripts.
