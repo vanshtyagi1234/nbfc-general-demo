@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>QuickLend — Privacy-First Personal Loans</title>
+  <!-- Optional runtime config; absent in dev (inline script seeds an empty default so the
+       inline app code falls back to localhost). Deploy writes config.js on prod. -->
+  <script>window.DEMO_CONFIG = window.DEMO_CONFIG || {};</script>
+  <script src="./config.js"></script>
+  <script src="../../packages/sdk/dist/esahamati.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --navy: #1A2B5F;
+      --blue: #2563EB;
+      --teal: #0EA5E9;
+      --green: #16A34A;
+      --gdk: #15803D;
+      --orange: #EA580C;
+      --grey: #6B7280;
+      --bg: #F1F5FE;
+      --border: #E0E7FF;
+      --text-dark: #0F1E42;
+      --text-muted: #64748B;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(165deg, #0f1e42, #1A2B5F);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Journey Bar */
+    #jbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .jstep {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .jdot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--text-dark);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .jlbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      width: 40px;
+      transition: color 0.3s ease;
+    }
+
+    .jstep.done .jdot {
+      background: var(--gdk);
+      border-color: var(--gdk);
+      color: white;
+    }
+
+    .jstep.done .jlbl {
+      color: var(--gdk);
+    }
+
+    .jstep.active .jdot {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: white;
+      box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+    }
+
+    .jstep.active .jlbl {
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    /* Phone Frame */
+    #phone {
+      width: 300px;
+      height: 580px;
+      background: #F9FAFB;
+      border-radius: 36px;
+      box-shadow: 0 0 0 5px #0f1e42, 0 0 0 7px #243060, 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 72px;
+      height: 18px;
+      background: #0f1e42;
+      border-radius: 0 0 11px 11px;
+      z-index: 30;
+    }
+
+    #appbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: white;
+      padding: 22px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 60px;
+    }
+
+    #appbar-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--navy);
+      flex: 1;
+    }
+
+    #appbar-back {
+      background: none;
+      border: none;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 24px;
+      padding: 4px 8px;
+      display: none;
+    }
+
+    #appbar-back.visible {
+      display: block;
+    }
+
+    #screen {
+      position: relative;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .screen-content {
+      padding: 20px 16px;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Restart Button */
+    #restart-btn {
+      color: var(--teal);
+      background: none;
+      border: none;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 10px;
+      transition: color 0.3s ease;
+    }
+
+    #restart-btn:hover {
+      color: var(--blue);
+    }
+
+    /* Form Elements */
+    input[type="date"],
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--blue);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg);
+    }
+
+    /* OTP Inputs */
+    .otp-inputs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .otp-digit {
+      width: 36px;
+      height: 44px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .otp-digit:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+      outline: none;
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Demo Accounts */
+    .demo-accounts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .account-pill {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .account-pill:hover {
+      background: white;
+      border-color: var(--teal);
+    }
+
+    .account-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .account-info {
+      flex: 1;
+    }
+
+    .account-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .account-phone {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Processing Animation */
+    .processing-step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .processing-indicator {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      color: white;
+    }
+
+    .processing-indicator.done {
+      background: var(--gdk);
+      border-color: var(--gdk);
+    }
+
+    .processing-indicator.spinning {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .processing-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--navy);
+    }
+
+    /* Section Heading */
+    .section-heading {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .section-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Insurance Plans */
+    .plan-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .plan-card:hover {
+      border-color: var(--teal);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+    }
+
+    .plan-name {
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .plan-price {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .plan-features {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Preference Cards */
+    .pref-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pref-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--blue);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: white;
+    }
+
+    .pref-text {
+      flex: 1;
+    }
+
+    .pref-title {
+      font-weight: 600;
+      color: var(--navy);
+      font-size: 14px;
+    }
+
+    .pref-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Logo */
+    .logo-svg {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+    }
+
+    /* Link */
+    .link {
+      color: var(--blue);
+      text-decoration: none;
+      background: none;
+      border: none;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      padding: 8px 0;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    /* Scrollbar Styling */
+    #screen::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #screen::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #screen::-webkit-scrollbar-thumb {
+      background: rgba(14, 165, 233, 0.3);
+      border-radius: 2px;
+    }
+
+    #screen::-webkit-scrollbar-thumb:hover {
+      background: rgba(14, 165, 233, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="jbar"></div>
+    <div id="phone">
+      <div class="notch"></div>
+      <div id="appbar">
+        <button id="appbar-back">←</button>
+        <div id="appbar-title">QuickLend</div>
+        <div style="width: 24px;"></div>
+      </div>
+      <div id="screen"></div>
+    </div>
+    <button id="restart-btn">Restart Demo</button>
+  </div>
+
+  <script>
+    // ====== Configuration ======
+    const __CFG = window.DEMO_CONFIG || {};
+    const ORG_ID = __CFG.ORG_ID || "org-quicklend-001";
+    const API_BASE = __CFG.API_BASE || "http://localhost:4000/api/v1";
+    const CONSENT_UI = __CFG.CONSENT_UI || "http://localhost:3000";
+
+    const DEMO_ACCOUNTS = [
+      { name: "Priya Sharma", phone: "+91-9876543210", avatar: "P" },
+      { name: "Rahul Mehta", phone: "+91-9876543211", avatar: "R" },
+      { name: "Anjali Patel", phone: "+91-9876543212", avatar: "A" }
+    ];
+
+    // ====== State ======
+    const STATE = {
+      currentScreen: "welcome",
+      authToken: null,
+      principalId: null,
+      age: null,
+      otpRequestId: null
+    };
+
+    // ====== Journey Bar Config ======
+    // Canonical 8-stage DPDP-aligned loan journey:
+    //   age → register → registration-notice → otp → kyc → bureau → aa → loan
+    //   → insurance → success → rights → marketing → finish
+    // Journey bar shows the user-visible milestones; intermediate screens
+    // (otp, processing) are not surfaced as steps.
+    const STEPS = ["age", "register", "kyc", "bureau", "aa", "loan", "insurance", "success", "rights"];
+    const STEP_LABELS = ["Age", "Sign-up", "KYC", "Bureau", "AA", "Loan", "Insure", "Approved", "Rights"];
+    const ORDER = ["welcome", "age", "registration-notice", "register", "otp", "kyc", "bureau", "aa", "loan", "insurance", "processing", "success", "rights", "marketing", "artifacts", "finish"];
+
+    // ====== SVG Icons ======
+    function getSvgCheckmark() {
+      return '<svg width="20" height="20" viewBox="0 0 20 20" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>';
+    }
+
+    function getSvgShield() {
+      return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+    }
+
+    function getSvgCheck() {
+      return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    }
+
+    function getSvgMail() {
+      return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>';
+    }
+
+    function getSvgPhone() {
+      return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>';
+    }
+
+    function getSvgBell() {
+      return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>';
+    }
+
+    function getSvgSpinner() {
+      return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0-10 10" stroke-dasharray="15.7" stroke-linecap="round"/></svg>';
+    }
+
+    // ====== Screen Definitions ======
+    const SCREENS = {
+      welcome() {
+        return `
+          <div class="screen-content">
+            <svg class="logo-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" rx="8" fill="#2563EB"/>
+              <text x="24" y="32" font-size="24" font-weight="700" fill="white" text-anchor="middle">Q</text>
+            </svg>
+            <h1 class="section-heading">QuickLend</h1>
+            <p class="section-desc">Your Personal Loan, Simplified</p>
+            <div class="card" style="margin: 20px 0;">
+              <div style="text-align: center; margin-bottom: 12px;">
+                <div style="font-size: 28px; font-weight: 700; color: var(--navy);">₹ 2,50,000</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Loan Amount</div>
+              </div>
+              <input type="range" min="50000" max="1000000" value="250000" step="10000" style="width: 100%; cursor: pointer;">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                <span>₹50K</span>
+                <span>₹10L</span>
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="goTo('age')">Check Eligibility</button>
+          </div>
+        `;
+      },
+
+      age() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Let's Get Started</h2>
+            <p class="section-desc">Enter your date of birth</p>
+            <input type="date" id="dob-input" placeholder="Date of Birth">
+            <div id="age-feedback" style="font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 16px;"></div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="validateAndContinueAge()">Continue</button>
+          </div>
+        `;
+      },
+
+      register() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Create Account</h2>
+            <p class="section-desc">Select or enter your phone number</p>
+            <div class="demo-accounts">
+              ${DEMO_ACCOUNTS.map((acc, i) => `
+                <div class="account-pill" onclick="selectAccount(${i})">
+                  <div class="account-avatar">${acc.avatar}</div>
+                  <div class="account-info">
+                    <div class="account-name">${acc.name}</div>
+                    <div class="account-phone">${acc.phone}</div>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+            <div style="text-align: center; margin: 16px 0; font-size: 12px; color: var(--text-muted);">Or enter manually:</div>
+            <input type="tel" id="phone-input" placeholder="Phone Number">
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="startOtpFlow()">Continue</button>
+          </div>
+        `;
+      },
+
+      otp() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Verify Phone</h2>
+            <p class="section-desc">Enter the 6-digit code we sent</p>
+            <div class="otp-inputs" id="otp-container">
+              ${Array(6).fill(0).map((_, i) => `<input type="text" class="otp-digit" maxlength="1" inputmode="numeric" data-index="${i}">`).join("")}
+            </div>
+            <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin: 12px 0;">
+              Demo OTP: <strong>123456</strong>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="verifyOTP()">Verify</button>
+            <button class="link" onclick="goTo('register')">Back</button>
+          </div>
+        `;
+      },
+
+      "registration-notice"() {
+        // Anonymous-first capture: <es-consent-modal> renders the
+        // `account-registration` profile (purposes, data fields, retention,
+        // consequence) directly from backend config. No JWT yet — posts to
+        // /consent/pending/grant and stores the sessionId in localStorage.
+        // The user enters their phone next; after OTP we call
+        // /consent/pending/link to bind the session id to the principal.
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Privacy Notice</h2>
+            <p class="section-desc">Review what we collect before we ask for your phone</p>
+            <div class="card">
+              <div class="card-desc">
+                The next screen shows our privacy notice for account registration —
+                what data we collect (name, mobile, email), why, retention, and your rights.<br><br>
+                <strong>Anonymous capture:</strong> your consent is recorded against a
+                short-lived session id now, and bound to your account once you verify
+                the OTP on the next steps.
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="showConsentModal('registration')">Open Privacy Notice</button>
+            <button class="link" onclick="goTo('age')">Back</button>
+          </div>
+        `;
+      },
+
+      kyc() {
+        return `
+          <div class="screen-content">
+            <div style="text-align: center; margin-bottom: 16px;">
+              ${getSvgShield()}
+            </div>
+            <h2 class="section-heading">Identity Verification</h2>
+            <p class="section-desc">We'll verify your identity securely</p>
+            <div class="card">
+              <div class="card-desc">
+                <strong>We'll check:</strong><br>
+                • Aadhaar / PAN verification<br>
+                • Address confirmation<br>
+                • Government ID validation
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="showConsentModal('kyc')">Grant Consent</button>
+          </div>
+        `;
+      },
+
+      bureau() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Credit Bureau Check</h2>
+            <p class="section-desc">We'll pull your credit report from RBI-authorised bureaus</p>
+            <div class="card">
+              <div class="card-title">What we'll fetch</div>
+              <div class="card-desc">
+                • CIBIL / Experian / Equifax / CRIF score<br>
+                • Existing loan accounts &amp; outstanding balances<br>
+                • Repayment history (last 36 months)<br><br>
+                <strong>Why:</strong> assess loan eligibility, decide interest rate &amp; sanction limit.<br><br>
+                <strong>Legal basis:</strong> CIC (Regulation) Act 2005, RBI directions — non-withdrawable while loan is active.
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="showConsentModal('bureau')">Authorise Bureau Pull</button>
+          </div>
+        `;
+      },
+
+      aa() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Account Aggregator</h2>
+            <p class="section-desc">Skip manual statement uploads — share via AA</p>
+            <div class="card">
+              <div class="card-title">How it works</div>
+              <div class="card-desc">
+                1. Pick your Account Aggregator (OneMoney / Finvu / NADL / CAMS Finserv)<br>
+                2. Authorise our request inside your AA app<br>
+                3. We fetch only the last 12 months of statements — nothing else<br><br>
+                <strong>You can revoke this consent anytime</strong> from your AA app or our preference centre.<br><br>
+                <strong>Legal basis:</strong> DPDP S6 explicit consent + RBI AA Master Direction.
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="showConsentModal('aa')">Pick AA &amp; Authorise</button>
+            <button class="link" onclick="goTo('loan')">Skip — I'll upload statements manually</button>
+          </div>
+        `;
+      },
+
+      loan() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Loan Details</h2>
+            <p class="section-desc">Review your loan terms</p>
+            <div class="card">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+                <div>
+                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Loan Amount</div>
+                  <div style="font-weight: 600; color: var(--navy);">₹ 2,50,000</div>
+                </div>
+                <div>
+                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Tenure</div>
+                  <div style="font-weight: 600; color: var(--navy);">24 months</div>
+                </div>
+                <div>
+                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Interest Rate</div>
+                  <div style="font-weight: 600; color: var(--navy);">11.5% p.a.</div>
+                </div>
+                <div>
+                  <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Monthly EMI</div>
+                  <div style="font-weight: 600; color: var(--navy);">₹ 11,250</div>
+                </div>
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="showConsentModal('loan')">Proceed to eNACH</button>
+          </div>
+        `;
+      },
+
+      insurance() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Loan Protection</h2>
+            <p class="section-desc">Optional insurance coverage</p>
+
+            <div class="plan-card" onclick="showConsentModal('insurance')">
+              <div class="plan-name">Basic Protection</div>
+              <div class="plan-price">₹ 99/month</div>
+              <div class="plan-features">
+                • Loss of income coverage<br>
+                • Disability coverage
+              </div>
+            </div>
+
+            <div class="plan-card" onclick="showConsentModal('insurance')">
+              <div class="plan-name">Comprehensive</div>
+              <div class="plan-price">₹ 199/month</div>
+              <div class="plan-features">
+                • All benefits of Basic<br>
+                • Critical illness coverage<br>
+                • Accidental death benefit
+              </div>
+            </div>
+
+            <div style="flex: 1;"></div>
+            <button class="link" onclick="goTo('processing')">Skip for Now</button>
+          </div>
+        `;
+      },
+
+      processing() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Processing...</h2>
+            <p class="section-desc">Verifying your details</p>
+            <div style="margin-top: 30px;">
+              <div class="processing-step">
+                <div class="processing-indicator spinning" id="step-0">
+                  ${getSvgSpinner()}
+                </div>
+                <div class="processing-label">Verifying Identity</div>
+              </div>
+              <div class="processing-step">
+                <div class="processing-indicator" id="step-1">
+                  <div style="width: 6px; height: 6px; background: var(--border); border-radius: 50%;"></div>
+                </div>
+                <div class="processing-label">Checking Credit</div>
+              </div>
+              <div class="processing-step">
+                <div class="processing-indicator" id="step-2">
+                  <div style="width: 6px; height: 6px; background: var(--border); border-radius: 50%;"></div>
+                </div>
+                <div class="processing-label">Preparing Offer</div>
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      success() {
+        return `
+          <div class="screen-content">
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="width: 60px; height: 60px; background: var(--gdk); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                ${getSvgCheck()}
+              </div>
+            </div>
+            <h2 class="section-heading">Congratulations!</h2>
+            <p class="section-desc">Your loan has been approved</p>
+            <div class="card">
+              <div class="card-title">Approved Amount</div>
+              <div class="card-desc" style="font-size: 16px; font-weight: 600; color: var(--gdk); margin: 8px 0;">₹ 2,50,000</div>
+              <div style="border-top: 1px solid var(--border); margin: 12px 0; padding-top: 12px;">
+                <div class="card-desc">
+                  <strong>Next Steps:</strong><br>
+                  • E-sign loan agreement<br>
+                  • Set up auto-pay (eNACH)<br>
+                  • Funds to arrive in 2 hours
+                </div>
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="goTo('rights')">Continue</button>
+          </div>
+        `;
+      },
+
+      rights() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Your Data Rights</h2>
+            <p class="section-desc">DPDP S11–14 — you control your data</p>
+            <div class="pref-card" onclick="openRights('data-access')" style="cursor:pointer;">
+              <div class="pref-icon">${getSvgShield()}</div>
+              <div class="pref-text">
+                <div class="pref-title">Access my data</div>
+                <div class="pref-desc">Download everything we hold (S11)</div>
+              </div>
+            </div>
+            <div class="pref-card" onclick="openRights('preferences')" style="cursor:pointer;">
+              <div class="pref-icon">${getSvgCheck()}</div>
+              <div class="pref-text">
+                <div class="pref-title">Manage / withdraw consent</div>
+                <div class="pref-desc">Toggle any optional purpose (S6)</div>
+              </div>
+            </div>
+            <div class="pref-card" onclick="openRights('grievance')" style="cursor:pointer;">
+              <div class="pref-icon">${getSvgBell()}</div>
+              <div class="pref-text">
+                <div class="pref-title">File a grievance</div>
+                <div class="pref-desc">Reach our Grievance Officer (S13)</div>
+              </div>
+            </div>
+            <div class="pref-card" onclick="openRights('nominee')" style="cursor:pointer;">
+              <div class="pref-icon">${getSvgMail()}</div>
+              <div class="pref-text">
+                <div class="pref-title">Register a nominee</div>
+                <div class="pref-desc">For incapacity / death (S14)</div>
+              </div>
+            </div>
+            <div class="pref-card" onclick="openRights('pwd-guardian')" style="cursor:pointer;">
+              <div class="pref-icon">${getSvgShield()}</div>
+              <div class="pref-text">
+                <div class="pref-title">Guardianship verification</div>
+                <div class="pref-desc">Lawful-guardian upload — S.9(3) Rule 11</div>
+              </div>
+            </div>
+            <div class="pref-card" onclick="openRights('breaches')" style="cursor:pointer;">
+              <div class="pref-icon">${getSvgPhone()}</div>
+              <div class="pref-text">
+                <div class="pref-title">Breach notifications</div>
+                <div class="pref-desc">View any incident affecting your data</div>
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="goTo('marketing')">Continue to Communications</button>
+          </div>
+        `;
+      },
+
+      marketing() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Stay Updated</h2>
+            <p class="section-desc">How should we reach you?</p>
+
+            <div class="pref-card">
+              <div class="pref-icon">${getSvgMail()}</div>
+              <div class="pref-text">
+                <div class="pref-title">Email</div>
+                <div class="pref-desc">Offers & updates</div>
+              </div>
+            </div>
+
+            <div class="pref-card">
+              <div class="pref-icon">${getSvgPhone()}</div>
+              <div class="pref-text">
+                <div class="pref-title">SMS</div>
+                <div class="pref-desc">Quick alerts</div>
+              </div>
+            </div>
+
+            <div class="pref-card">
+              <div class="pref-icon">${getSvgBell()}</div>
+              <div class="pref-text">
+                <div class="pref-title">Push Notifications</div>
+                <div class="pref-desc">App updates</div>
+              </div>
+            </div>
+
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="showConsentModal('marketing')">Allow All</button>
+            <button class="link" onclick="goTo('finish')">Not Now</button>
+          </div>
+        `;
+      },
+
+      finish() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">You're All Set!</h2>
+            <p class="section-desc">Your loan journey is complete</p>
+            <div class="card">
+              <div class="card-title">Consents Granted</div>
+              <div class="card-desc">
+                • Identity Verification<br>
+                • Loan & eNACH<br>
+                • Insurance (optional)<br>
+                • Marketing (optional)
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Your Rights</div>
+              <div class="card-desc">
+                You can:<br>
+                • View & download all consents<br>
+                • Withdraw consent anytime<br>
+                • Request data deletion<br>
+                • File a grievance
+              </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="restart()">Restart Demo</button>
+          </div>
+        `;
+      }
+    };
+
+    // ====== Navigation ======
+    function goTo(screenId) {
+      const el = document.getElementById("screen");
+
+      // Phase 1: Fade out + slide (no transition yet)
+      el.style.transition = "none";
+      el.style.opacity = "0";
+      el.style.transform = "translateX(16px)";
+
+      setTimeout(() => {
+        // Phase 2: Inject new content
+        STATE.currentScreen = screenId;
+        if (SCREENS[screenId]) {
+          el.innerHTML = SCREENS[screenId]();
+        }
+        el.scrollTop = 0;
+
+        // Phase 3: Enable transition, animate in
+        el.style.transition = "opacity 0.25s ease-out, transform 0.25s ease-out";
+        el.style.opacity = "1";
+        el.style.transform = "translateX(0)";
+
+        // Phase 4: Remove transition after animation
+        setTimeout(() => {
+          el.style.transition = "none";
+        }, 300);
+
+        renderJBar();
+        updateAppBar();
+        postRender(screenId);
+      }, 150);
+    }
+
+    function updateAppBar() {
+      const backBtn = document.getElementById("appbar-back");
+      const titles = {
+        welcome: "QuickLend",
+        age: "Get Started",
+        register: "Create Account",
+        otp: "Verify Phone",
+        kyc: "Identity Verification",
+        loan: "Loan Details",
+        insurance: "Loan Protection",
+        processing: "Processing...",
+        success: "Approved!",
+        marketing: "Stay Updated",
+        finish: "All Done"
+      };
+
+      document.getElementById("appbar-title").textContent = titles[STATE.currentScreen] || "QuickLend";
+
+      const canGoBack = ORDER.indexOf(STATE.currentScreen) > 0;
+      if (canGoBack) {
+        backBtn.classList.add("visible");
+      } else {
+        backBtn.classList.remove("visible");
+      }
+    }
+
+    function postRender(screenId) {
+      if (screenId === "otp") {
+        // Initialize OTP inputs immediately for auto-advance
+        initOTPInputs();
+        // Then focus first input
+        setTimeout(() => {
+          const firstInput = document.querySelector(".otp-digit");
+          if (firstInput) firstInput.focus();
+        }, 50);
+      }
+
+      if (screenId === "processing") {
+        startProcessingAnimation();
+      }
+
+      if (screenId === "artifacts" && !STATE.artifacts) {
+        // Auto-fetch on first entry only. goToArtifactSelection() sets
+        // STATE.artifacts and re-enters this screen to render the list —
+        // without this guard the flow re-fetches and re-renders forever.
+        setTimeout(() => {
+          downloadCertificate();
+        }, 300);
+      }
+    }
+
+    // ====== Journey Bar ======
+    function renderJBar() {
+      const si = ORDER.indexOf(STATE.currentScreen);
+      const jbar = document.getElementById("jbar");
+
+      jbar.innerHTML = STEPS.map((id, i) => {
+        const done = si > STEPS.indexOf(id) + 1;
+        const active = si === STEPS.indexOf(id) + 1;
+        const stepNum = i + 1;
+
+        return `
+          <div class="jstep ${done ? "done" : ""} ${active ? "active" : ""}">
+            <div class="jdot">${done ? getSvgCheckmark() : stepNum}</div>
+            <div class="jlbl">${STEP_LABELS[i]}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ====== OTP Input ======
+    function initOTPInputs() {
+      const inputs = document.querySelectorAll(".otp-digit");
+      inputs.forEach((input, idx) => {
+        input.addEventListener("input", (e) => {
+          if (e.target.value) {
+            if (idx < inputs.length - 1) {
+              inputs[idx + 1].focus();
+            }
+          }
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !e.target.value && idx > 0) {
+            inputs[idx - 1].focus();
+          }
+        });
+      });
+    }
+
+    // ====== Processing Animation ======
+    function startProcessingAnimation() {
+      const delays = [0, 1000, 2000];
+
+      delays.forEach((delay, stepIdx) => {
+        setTimeout(() => {
+          const indicator = document.getElementById(`step-${stepIdx}`);
+          if (indicator) {
+            indicator.classList.remove("spinning");
+            indicator.classList.add("done");
+            indicator.innerHTML = getSvgCheck();
+          }
+
+          if (stepIdx < 2) {
+            const nextIndicator = document.getElementById(`step-${stepIdx + 1}`);
+            if (nextIndicator) {
+              nextIndicator.classList.add("spinning");
+              nextIndicator.innerHTML = getSvgSpinner();
+            }
+          }
+        }, delay);
+      });
+
+      setTimeout(() => {
+        goTo("success");
+      }, 3000);
+    }
+
+    // ====== Age Validation ======
+    function validateAndContinueAge() {
+      const dob = document.getElementById("dob-input").value;
+      if (!dob) {
+        alert("Please enter your date of birth");
+        return;
+      }
+
+      const today = new Date();
+      const birthDate = new Date(dob);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        alert("You must be at least 18 years old");
+        return;
+      }
+
+      STATE.age = age;
+      goTo("registration-notice");
+    }
+
+    // ====== Account Selection ======
+    function selectAccount(idx) {
+      const acc = DEMO_ACCOUNTS[idx];
+      document.getElementById("phone-input").value = acc.phone;
+    }
+
+    // ====== OTP Flow ======
+    // Two-stage: phone entry → registration-notice (DPDP S5 notice ack) → OTP
+    // send. Notice screen surfaces the data we collect at signup *before* we
+    // dispatch the OTP, satisfying Rule 3(b)(i) for the registration purpose.
+    function startOtpFlow() {
+      const phoneRaw = document.getElementById("phone-input").value;
+      if (!phoneRaw) {
+        alert("Please enter a phone number");
+        return;
+      }
+      STATE.pendingPhone = phoneRaw.replace(/[-\s]/g, "");
+      // Consent already captured anonymously on the registration-notice screen
+      // (sessionId in localStorage). Send the OTP straight away — verifyOTP
+      // will call /consent/pending/link to bind the session id to the freshly
+      // authenticated principal.
+      sendOTP();
+    }
+
+    // Notice ack on the registration screen captures DPDP S5/S7(a) compliance:
+    // the principal has seen the registration notice before any data-collection
+    // request leaves the device. The actual immutable consent record for
+    // `account-registration` is logged once the OTP completes and we have an
+    // auth context (see verifyOTP + recordRegistrationAck).
+    function acknowledgeAndSendOtp() {
+      STATE.registrationAckAt = new Date().toISOString();
+      sendOTP();
+    }
+
+    // Open a data-rights flow (DSAR / preferences / grievance / nominee /
+    // pwd-guardian / breaches) in a new tab. The destination
+    // routes already exist in the consent-ui app; principal stays signed-in
+    // via the auth token in the consent-ui's IndexedDB session — for the demo
+    // we just use the unauthenticated routes which prompt for OTP again if
+    // needed.
+    function openRights(slug) {
+      const url = new URL(CONSENT_UI + "/" + ORG_ID + "/" + slug);
+      // Cross-origin bridge (CLAUDE.md "My Cookies principal-facing surface"):
+      // <es-cookie-banner> writes its anonymous session id to THIS page's
+      // origin, invisible to consent-ui's own localStorage. Forward it as a
+      // query param so consent-ui/lib/cookie-session.ts can pick it up and
+      // link the principal's pre-login cookie choices on the next OTP login.
+      const cookieSessionId = window.__cookieBannerSessionId;
+      if (typeof cookieSessionId === "string" && cookieSessionId.length > 0 && cookieSessionId.length <= 128) {
+        url.searchParams.set("cookie_session", cookieSessionId);
+      }
+      window.open(url.toString(), "_blank", "noopener");
+    }
+
+    async function sendOTP() {
+      const phone = STATE.pendingPhone;
+      if (!phone) {
+        alert("Phone number missing — please go back and re-enter");
+        return;
+      }
+
+      try {
+        const response = await fetch(API_BASE + "/auth/otp/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orgId: ORG_ID, phone })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          alert("Error: " + (data.error || "Failed to send OTP"));
+          return;
+        }
+
+        STATE.otpRequestId = data.data.requestId;
+        goTo("otp");
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    async function verifyOTP() {
+      const inputs = document.querySelectorAll(".otp-digit");
+      const otp = Array.from(inputs).map(i => i.value).join("");
+
+      if (otp.length !== 6) {
+        alert("Please enter all 6 digits");
+        return;
+      }
+
+      try {
+        const response = await fetch(API_BASE + "/auth/otp/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestId: STATE.otpRequestId, otp })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          alert("Error: " + (data.error || "Invalid OTP"));
+          return;
+        }
+
+        STATE.authToken = data.data.token;
+        STATE.principalId = data.data.principalId;
+
+        // Bind the pre-OTP anonymous registration consent (stored against a
+        // session id during the registration-notice modal) to the freshly
+        // authenticated principal. After this call the consent appears in
+        // the principal's normal consent ledger / data-access UI just like
+        // any other granted consent — Section 6 audit trail intact.
+        await linkPendingConsent();
+        await linkCookieBannerSession();
+
+        goTo("kyc");
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    // Re-audit M-14 (2026-09-15) — the host's OWN sign-in must also bind the
+    // cookie banner's anonymous choices, or they stay orphaned under the anon
+    // id (invisible to My Cookies, DSAR access and erasure). The banner wrote
+    // this id to THIS page's own localStorage, so linking it here is a
+    // first-party action — the same trust level as consent-ui's same-origin
+    // auto-link (the cross-origin confirm step only exists for an id that
+    // arrives in a URL).
+    async function linkCookieBannerSession() {
+      const storageKey = "cmp_cookie_session_" + ORG_ID;
+      let sessionId = null;
+      try { sessionId = localStorage.getItem(storageKey); } catch { /* ignore */ }
+      if (!sessionId) return;
+      try {
+        const res = await fetch(API_BASE + "/consent/cookies/link-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + STATE.authToken
+          },
+          body: JSON.stringify({ orgId: ORG_ID, sessionId })
+        });
+        if (!res.ok) console.warn("Cookie-session link failed:", res.status);
+      } catch (err) {
+        console.warn("Cookie-session link error:", err);
+      }
+    }
+
+    async function linkPendingConsent() {
+      const storageKey = "cmp_pending_session_" + ORG_ID;
+      let sessionId = null;
+      try { sessionId = localStorage.getItem(storageKey); } catch { /* ignore */ }
+      if (!sessionId) return;
+
+      try {
+        const res = await fetch(API_BASE + "/consent/pending/link", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + STATE.authToken
+          },
+          body: JSON.stringify({ orgId: ORG_ID, sessionId })
+        });
+        if (!res.ok) {
+          console.warn("Pending-consent link failed:", res.status);
+          return;
+        }
+        try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
+      } catch (err) {
+        console.warn("Pending-consent link error:", err);
+      }
+    }
+
+    // ====== Consent Modal ======
+    function showConsentModal(profileCode) {
+      const profileMap = {
+        registration: "account-registration",
+        kyc: "identity-kyc-verification",
+        bureau: "credit-bureau-pull",
+        aa: "account-aggregator-fetch",
+        loan: "loan-processing-repayment",
+        insurance: "insurance-protection-plans",
+        marketing: "marketing-communications"
+      };
+
+      const code = profileMap[profileCode] || profileCode;
+
+      if (!customElements.get("es-consent-modal")) {
+        alert("Consent modal not available");
+        return;
+      }
+
+      let modal = document.querySelector("es-consent-modal");
+      if (!modal) {
+        modal = document.createElement("es-consent-modal");
+        document.body.appendChild(modal);
+        setupConsentModalListeners(modal);
+      }
+
+      modal.setAttribute("org-id", ORG_ID);
+      modal.setAttribute("api-base", API_BASE);
+      modal.setAttribute("consent-ui-base", CONSENT_UI);
+      modal.setAttribute("profile-code", code);
+
+      if (STATE.authToken) {
+        modal.setAttribute("auth-token", STATE.authToken);
+        modal.setAttribute("principal-id", STATE.principalId);
+      }
+
+      setTimeout(() => {
+        modal.open = true;
+        modal.show().catch(err => alert("Error: " + err.message));
+      }, 100);
+    }
+
+    function setupConsentModalListeners(modal) {
+      // Per-screen "what comes next" map. Shared between the granted
+      // and rejected handlers so we never drift between the two.
+      const NEXT_SCREEN = {
+        "registration-notice": "otp",
+        kyc: "bureau",
+        bureau: "aa",
+        aa: "loan",
+        loan: "insurance",
+        insurance: "processing",
+        marketing: "artifacts"
+      };
+
+      // Principal accepted → always advance. User intent was positive;
+      // mandatory vs optional composition doesn't matter here.
+      modal.addEventListener("granted", async (event) => {
+        // SDK forwards the anonymous-capture sessionId from the iframe's
+        // postMessage payload. consent-ui writes the same id to its own
+        // origin's localStorage, but cross-origin LS is invisible to the
+        // host — the SDK callback is the only viable bridge. Persist
+        // here so linkPendingConsent() finds it after OTP.
+        const sessionId = event.detail?.sessionId;
+        if (typeof sessionId === "string" && sessionId.length > 0 && sessionId.length <= 128) {
+          try {
+            localStorage.setItem("cmp_pending_session_" + ORG_ID, sessionId);
+          } catch (err) {
+            // LS quota / private-browsing / blocked-storage — surface to
+            // devtools so the symptom is debuggable. linkPendingConsent()
+            // will return early below and the pending row stays unbound.
+            console.warn("[cmp] failed to persist pending sessionId:", err);
+          }
+        }
+        // Anonymous-first registration: the modal has just stored an
+        // anonymous pending consent (sessionId in localStorage). Advance
+        // to the phone-entry screen — verifyOTP later POSTs
+        // /consent/pending/link so the consent is bound to the real
+        // principal record once the OTP completes.
+        if (STATE.currentScreen === "registration-notice") {
+          setTimeout(() => goTo("register"), 300);
+          return;
+        }
+        // Authenticated screens (kyc / bureau / loan / insurance / marketing /
+        // …) — the iframe still submits as pending because the SDK doesn't
+        // forward the auth token. Bind the freshly stashed sessionId to the
+        // principal here so the consent shows up in /consent/:principalId
+        // (the artifact-download screen reads from there).
+        if (STATE.authToken) {
+          try { await linkPendingConsent(); } catch (err) { console.warn(err); }
+        }
+        const nextScreenId = NEXT_SCREEN[STATE.currentScreen];
+        if (nextScreenId) {
+          setTimeout(() => goTo(nextScreenId), 300);
+        }
+      });
+
+      // Principal rejected → conditional advance per DPDP S6/S7 semantics.
+      //   hadMandatory === true  → profile has S7 statutory or S6
+      //                            mandatory purposes (e.g. KYC, loan).
+      //                            Rejection cannot unlock the downstream
+      //                            step; hold the user on the current
+      //                            screen and tell them why.
+      //   hadMandatory === false → all-optional profile (e.g. marketing).
+      //                            Rejection is a legitimate choice — let
+      //                            the user proceed just like on grant.
+      modal.addEventListener("rejected", async (event) => {
+        const hadMandatory = Boolean(event.detail?.hadMandatory);
+        const nextScreenId = NEXT_SCREEN[STATE.currentScreen];
+
+        if (hadMandatory) {
+          setTimeout(() => {
+            alert(
+              "To continue, we need your consent for the processing marked " +
+              "as required. You can review and grant it by tapping the " +
+              "button again, or exit the flow."
+            );
+          }, 300);
+          return;
+        }
+
+        // All-optional rejection (e.g. marketing) — still link the pending
+        // session id so the captured rejection is visible on the principal's
+        // ledger and the consent-artifact list reflects the final choice.
+        if (STATE.authToken) {
+          try { await linkPendingConsent(); } catch (err) { console.warn(err); }
+        }
+
+        if (nextScreenId) {
+          setTimeout(() => goTo(nextScreenId), 300);
+        }
+      });
+
+      modal.addEventListener("error", (event) => {
+        alert("Error: " + (event.detail?.message || "Unknown error"));
+      });
+    }
+
+    // ====== Actions ======
+    async function downloadCertificate() {
+      if (!STATE.principalId || !STATE.authToken) {
+        alert("Please complete authentication first");
+        return;
+      }
+
+      try {
+        // Fetch consents for this principal - each consent has an artifact
+        const response = await fetch(
+          `${API_BASE}/consent/${STATE.principalId}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${STATE.authToken}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        const data = await response.json();
+        if (!data.success) {
+          alert("Error fetching certificates: " + (data.error || "Unknown error"));
+          return;
+        }
+
+        const consents = (data.data?.consents || []).filter(c => c.status === "granted");
+
+        if (consents.length === 0) {
+          alert("No granted consents yet. Download will be available after granting consent.");
+          return;
+        }
+
+        // Convert consents to artifact format for download
+        const artifacts = consents.map(c => ({
+          id: c.consentId,
+          name: `${c.purposeName || c.purposeCode} - Consent Artifact`,
+          created_at: c.grantedAt,
+          type: "HTML"
+        }));
+
+        if (artifacts.length === 1) {
+          // Single artifact - download directly
+          await downloadArtifact(artifacts[0]);
+        } else {
+          // Multiple artifacts - show selection screen
+          goToArtifactSelection(artifacts);
+        }
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    async function downloadArtifact(artifactOrIdx) {
+      // Handle being called from artifacts selection screen (with index) or directly (with artifact object)
+      let artifact;
+      if (typeof artifactOrIdx === "number") {
+        artifact = STATE.artifacts[artifactOrIdx];
+      } else {
+        artifact = artifactOrIdx;
+      }
+
+      // Determine extension based on artifact type
+      let extension = ".html"; // default
+      if (artifact.type) {
+        if (artifact.type.toUpperCase() === "PDF") {
+          extension = ".pdf";
+        } else if (artifact.type.toLowerCase() === "html") {
+          extension = ".html";
+        }
+      }
+
+      const baseName = artifact.name || artifact.fileName || "consent-artifact";
+      const fileName = baseName.includes(".") ? baseName : baseName + extension;
+
+      try {
+        // Use consent ID to download artifact from backend
+        if (artifact.id) {
+          const downloadUrl = `${API_BASE}/consent/artifact/${artifact.id}/download`;
+
+          const response = await fetch(downloadUrl, {
+            headers: {
+              "Authorization": `Bearer ${STATE.authToken}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Download failed: ${response.statusText}`);
+          }
+
+          // Get the blob and trigger download
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else if (artifact.url || artifact.file_url || artifact.downloadUrl) {
+          // If it's a direct URL, use it
+          const fileUrl = artifact.url || artifact.file_url || artifact.downloadUrl;
+          const a = document.createElement("a");
+          a.href = fileUrl;
+          a.download = fileName;
+          a.target = "_blank";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } else {
+          alert("Artifact format not recognized");
+        }
+      } catch (err) {
+        alert("Download error: " + err.message);
+      }
+    }
+
+    function goToArtifactSelection(artifacts) {
+      const screenId = "artifacts";
+      STATE.artifacts = artifacts;
+      SCREENS[screenId] = function() {
+        return `
+          <div class="screen-content">
+            <h2 class="section-heading">Download Certificates</h2>
+            <p class="section-desc">Click to download any certificate</p>
+            ${artifacts.map((artifact, idx) => `
+              <div class="card" onclick="downloadArtifact(${idx})" style="cursor: pointer; transition: all 0.2s;">
+                <div class="card-title">${artifact.name || `Certificate ${idx + 1}`}</div>
+                <div class="card-desc">
+                  Type: ${artifact.type || "PDF"}<br>
+                  Created: ${artifact.created_at ? new Date(artifact.created_at).toLocaleDateString() : "Unknown"}
+                </div>
+              </div>
+            `).join("")}
+            <div style="flex: 1;"></div>
+            <button class="btn" onclick="goTo('finish')" style="margin-bottom: 8px;">Next</button>
+            <button class="link" onclick="goTo('finish')">Skip Downloads</button>
+          </div>
+        `;
+      };
+      goTo(screenId);
+    }
+
+    function restart() {
+      STATE.currentScreen = "welcome";
+      // Revoke the principal session server-side before dropping the token
+      // (migration 411). Clearing it locally alone leaves the credential
+      // valid for its full 24h — this demo is the reference an integrator
+      // copies, so it has to model the correct shape. `keepalive` matters
+      // for the same reason it does in consent-ui's own logout: goTo()
+      // re-renders immediately and would otherwise cancel the in-flight
+      // revoke, making the reset LOOK like a sign-out while the session
+      // stays live.
+      if (STATE.authToken) {
+        try {
+          fetch(API_BASE + "/auth/principal/logout", {
+            method: "POST",
+            keepalive: true,
+            headers: { "Authorization": "Bearer " + STATE.authToken }
+          }).catch(function () { /* best-effort: local reset proceeds regardless */ });
+        } catch (err) {
+          console.warn("[demo] principal logout failed:", err);
+        }
+      }
+      STATE.authToken = null;
+      STATE.principalId = null;
+      STATE.age = null;
+      STATE.otpRequestId = null;
+      STATE.artifacts = null;
+      goTo("welcome");
+    }
+
+    // ====== Back Button ======
+    document.getElementById("appbar-back").addEventListener("click", () => {
+      const currentIdx = ORDER.indexOf(STATE.currentScreen);
+      if (currentIdx > 0) {
+        goTo(ORDER[currentIdx - 1]);
+      }
+    });
+
+    // ====== Restart Button ======
+    document.getElementById("restart-btn").addEventListener("click", restart);
+
+    // ====== Init ======
+    goTo("welcome");
+  </script>
+
+  <!-- ====== Cookie consent banner (DPDP S.6 / S.7) ======
+       Drop-in <es-cookie-banner> Web Component. Bundle served via the nginx
+       /packages/ alias using the SAME relative path as the consent SDK above —
+       cdn.<brand> is NOT live. The banner auto-fetches
+       /public/:orgId/cookies/banner.json and themes from the org's
+       primaryColor (QuickLend indigo / MyCare green), so no per-page CSS. -->
+  <script src="../../packages/cookie-banner-sdk/dist/cookie-banner.min.js"></script>
+  <script>
+    (function () {
+      var cfg = window.DEMO_CONFIG || {};
+      var orgId = cfg.ORG_ID || "org-quicklend-001";
+      var apiBase = cfg.API_BASE || "http://localhost:4000/api/v1";
+      var banner = document.createElement("es-cookie-banner");
+      banner.setAttribute("org-id", orgId);
+      banner.setAttribute("api-base", apiBase);
+      // Tag-gating demo line: necessary cookies (DPDP S.7) need no consent;
+      // analytics/marketing (DPDP S.6) load only after the principal opts in.
+      // Cross-origin bridge (CLAUDE.md "Cookie Banner — Anonymous-First
+      // Cross-Origin Bridge"): capture the sessionId for forwarding as the
+      // `cookie_session` query param on the next consent-ui navigation.
+      // consent-ui NEVER auto-links a query-param-sourced id — the
+      // principal explicitly confirms after login. See that section for
+      // why (two earlier "proof of locality" designs were tried and both
+      // failed — a signed token can be self-minted by an anonymous caller,
+      // and a first-party proof cookie is either non-functional cross-site
+      // or CSRF-able, never both safe and working at once).
+      function captureBannerSessionId(sessionId) {
+        if (typeof sessionId !== "string" || sessionId.length === 0) return;
+        window.__cookieBannerSessionId = sessionId;
+      }
+      banner.addEventListener("granted", function (e) {
+        var choices = (e.detail && e.detail.choices) || {};
+        console.info("[demo] cookie consent granted; analytics tags " +
+          (choices.analytics ? "ENABLED" : "blocked"));
+        captureBannerSessionId(e.detail && e.detail.sessionId);
+      });
+      banner.addEventListener("withdrawn", function (e) {
+        console.info("[demo] cookie consent withdrawn — non-essential tags blocked");
+        captureBannerSessionId(e.detail && e.detail.sessionId);
+      });
+      document.body.appendChild(banner);
+      // Returning visitor whose decision is still fresh — the banner
+      // renders nothing and emits only `ready` (no sessionId in that
+      // event's detail), so `granted`/`withdrawn` never fire this pageview.
+      // Seed straight from the SDK's own localStorage write (host origin,
+      // same key the SDK always uses) so the bridge still works for a
+      // principal who logs in without re-touching the banner.
+      try {
+        var storedSessionId = window.localStorage.getItem("cmp_cookie_session_" + orgId);
+        if (storedSessionId) captureBannerSessionId(storedSessionId);
+      } catch (e) { /* private browsing / blocked storage */ }
+    })();
+  </script>
+</body>
+</html>

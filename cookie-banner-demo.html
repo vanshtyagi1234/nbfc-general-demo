@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow">
+    <title>e-Sahamati cookie banner — demo</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      header,
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      header {
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      h1 {
+        margin: 0;
+        font-size: 22px;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 16px;
+        border-radius: 8px;
+        font-size: 12px;
+        overflow-x: auto;
+      }
+      .event-log {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 16px;
+        min-height: 80px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      .tag-status {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        margin-right: 8px;
+        font-weight: 600;
+      }
+      .tag-status.blocked {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .tag-status.allowed {
+        background: #dcfce7;
+        color: #166534;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>e-Sahamati cookie banner — demo</h1>
+      <p style="margin: 4px 0 0; color: #64748b; font-size: 14px;">
+        Reference host integration. Drop the <code>&lt;script&gt;</code> tag,
+        the banner auto-fetches the org's config, and tag loaders gate on
+        the <code>granted</code> CustomEvent.
+      </p>
+    </header>
+    <main>
+      <h2>Tag gates</h2>
+      <p>
+        <span id="tag-analytics" class="tag-status blocked">analytics: blocked</span>
+        <span id="tag-marketing" class="tag-status blocked">marketing: blocked</span>
+      </p>
+      <p style="color: #64748b; font-size: 13px;">
+        Tags below stay blocked until the principal grants their category.
+        Refresh after a Reject to confirm gates persist via the anonymous
+        session id stored in <code>localStorage</code>.
+      </p>
+
+      <h2>Event log</h2>
+      <div id="log" class="event-log">awaiting banner…</div>
+
+      <h2>Snippet</h2>
+      <pre><code>&lt;script src="cookie-banner.iife.js"&gt;&lt;/script&gt;
+&lt;es-cookie-banner
+  org-id="org-quicklend-001"
+  api-base="http://localhost:4000/api/v1"
+&gt;&lt;/es-cookie-banner&gt;</code></pre>
+    </main>
+
+    <!--
+      Production: replace with the minified bundle served from your CDN, e.g.
+      <script src="https://cdn.example.com/cookie-banner.min.js"></script>
+      Demo path assumes a sibling copy of the dist bundle.
+    -->
+    <!--
+      FB-03 script-gating demo: these two scripts stay inert (type="text/plain")
+      until the visitor consents to their category. Watch the "Gated scripts"
+      status line + the console — analytics/marketing markers only appear
+      after Accept all or a matching Save preferences.
+    -->
+    <script type="text/plain" data-cmp-category="analytics">
+      window.__demoAnalyticsRan = true;
+      console.info("[gating-demo] analytics script executed");
+      var el = document.getElementById("gate-analytics");
+      if (el) el.textContent = "analytics: EXECUTED";
+    </script>
+    <script type="text/plain" data-cmp-category="marketing">
+      window.__demoMarketingRan = true;
+      console.info("[gating-demo] marketing script executed");
+      var el2 = document.getElementById("gate-marketing");
+      if (el2) el2.textContent = "marketing: EXECUTED";
+    </script>
+    <div style="position:fixed;top:8px;right:8px;background:#111;color:#0f0;font:12px monospace;padding:8px 10px;border-radius:6px;z-index:9999">
+      <div>Gated scripts (FB-03)</div>
+      <div id="gate-analytics">analytics: blocked</div>
+      <div id="gate-marketing">marketing: blocked</div>
+    </div>
+
+    <script src="../../packages/cookie-banner-sdk/dist/cookie-banner.js"></script>
+    <es-cookie-banner
+      id="banner"
+      org-id="org-quicklend-001"
+      api-base="http://localhost:4000/api/v1"
+    ></es-cookie-banner>
+
+    <script>
+      const banner = document.getElementById("banner")
+      const log = document.getElementById("log")
+      function appendLog(line) {
+        const ts = new Date().toISOString().slice(11, 19)
+        log.textContent = `[${ts}] ${line}\n` + log.textContent
+      }
+
+      function setTag(category, granted) {
+        const el = document.getElementById("tag-" + category)
+        if (!el) return
+        el.classList.toggle("allowed", granted)
+        el.classList.toggle("blocked", !granted)
+        el.textContent = `${category}: ${granted ? "allowed" : "blocked"}`
+      }
+
+      banner.addEventListener("ready", (e) => {
+        appendLog("ready: banner config v" + e.detail.config.bannerVersion)
+      })
+      banner.addEventListener("granted", (e) => {
+        const c = e.detail.choices
+        setTag("analytics", !!c.analytics)
+        setTag("marketing", !!c.marketing)
+        appendLog(
+          "granted: " +
+            JSON.stringify({
+              session: e.detail.sessionId,
+              principal: e.detail.principalId,
+              choices: c,
+            }),
+        )
+        // Example: load analytics ONLY after granted.
+        if (c.analytics) {
+          // window.dataLayer = window.dataLayer || []
+          // Insert your GA / Mixpanel / Clarity loader here.
+          appendLog("(would load analytics SDK here)")
+        }
+        if (c.marketing) {
+          appendLog("(would load marketing pixels here)")
+        }
+      })
+      banner.addEventListener("withdrawn", (e) => {
+        appendLog("withdrawn: " + JSON.stringify(e.detail))
+      })
+      banner.addEventListener("error", (e) => {
+        appendLog("error: " + e.detail.code + " — " + e.detail.message)
+      })
+    </script>
+  </body>
+</html>
