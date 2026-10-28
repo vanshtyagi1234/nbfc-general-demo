@@ -17,18 +17,21 @@ every consent, OTP and data-rights call goes to e-Sahamati.
 
 ## Run it
 
-1. Start e-Sahamati locally (from the e-sahamati repo: `npm run dev`), so the API is on
-   `localhost:4000` and the consent UI on `localhost:3000`.
-2. In this folder:
+The committed `config/env.js` points at production e-Sahamati
+(`api.e-sahamati.com` / `consent.e-sahamati.com`, org `org-quicklend-001`, the same
+values as the live QuickLend demo at demo.e-sahamati.com). So the demo works with
+nothing running locally:
 
-   ```bash
-   cp config/env.example.js config/env.js   # optional for local dev; edit for other environments
-   npm start                                 # serves on http://localhost:8000 and opens index.html
-   ```
+```bash
+npm start      # serves on http://localhost:8000 and opens index.html
+```
 
-   `npm run start:dpo` opens `dpo.html`. Any static server works; port 8000 matters
-   only locally, because e-Sahamati's development CORS allow-list already includes
-   `http://localhost:8000`.
+`npm run start:dpo` opens `dpo.html`. Use port 8000: e-Sahamati's CORS allow-list
+includes `http://localhost:8000`.
+
+To run against a local e-Sahamati instead (`npm run dev` in the e-sahamati repo: API on
+`localhost:4000`, consent UI on `localhost:3000`), copy `config/env.example.js` over
+`config/env.js` and do not commit that change.
 
 Demo sign-in: pick a demo account on the sign-up screen, OTP `123456`.
 
@@ -57,8 +60,8 @@ Two files, both plain JavaScript loaded before the page scripts.
 
 ### `config/env.js`: which deployment and organisation
 
-Copy from `config/env.example.js`. It is gitignored, so each environment keeps its own.
-Without it the demo uses the local dev stack and the QuickLend org.
+Committed with the production values. `config/env.example.js` lists every key with the
+local-dev values; the pages fall back to those if `config/env.js` is missing.
 
 | Key | Default | Purpose |
 |---|---|---|
@@ -116,16 +119,8 @@ used.
 Any static host works (nginx, S3 with CloudFront, Netlify, ...):
 
 1. Upload the repo contents (`config/env.example.js` is not needed).
-2. Write `config/env.js` for that environment, for example:
-
-   ```js
-   window.DEMO_CONFIG = {
-     ORG_ID: "org-quicklend-001",
-     API_BASE: "https://api.esahamati.com/api/v1",
-     CONSENT_UI: "https://consent.esahamati.com",
-   };
-   ```
-
+2. `config/env.js` already targets production e-Sahamati; edit it only for another
+   environment.
 3. Add the demo's origin (e.g. `https://nbfc-demo.example.com`) to the organisation's
    allowed origins (Settings → Integration), or to `ALLOWED_ORIGINS` on the e-Sahamati
    API. Without it, the browser blocks every API call.
