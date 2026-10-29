@@ -7,6 +7,7 @@
     "start": "npx http-server . -p 8000 -c-1 -o /index.html",
     "start:dpo": "npx http-server . -p 8000 -c-1 -o /dpo.html",
     "start:classic": "npx http-server . -p 8000 -c-1 -o /classic.html",
+    "start:web": "npx http-server . -p 8000 -c-1 -o /web.html",
     "serve": "npx http-server . -p 8000 -c-1"
   }
 }

@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title data-brand-title="{shortName} — Privacy-First {productName}" data-brand-title-configurable>QuickLend — Privacy-First Personal Loans</title>
+  <!-- The index.html journey as a desktop website: same screens, consent screens and
+       e-Sahamati calls, laid out for a laptop browser. See config/env.js. -->
+  <script>window.DEMO_CONFIG = window.DEMO_CONFIG || {};</script>
+  <script src="./config/env.js"></script>
+  <script src="./config/brand.js"></script>
+  <script src="./js/brand.js"></script>
+  <script src="./js/india-states.js"></script>
+  <script src="./js/sdk-loader.js" data-load="consent cookie-banner"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Brand colours come from js/brand.js (--brand-*); the fallbacks are the original demo's. */
+    :root {
+      --navy: var(--brand-secondary, #1A2B5F);
+      --navy-deep: var(--brand-secondary-deep, #0f1e42);
+      --blue: var(--brand-primary, #2563EB);
+      --blue-hover: var(--brand-primary-hover, #1d4ed8);
+      --blue-rgb: var(--brand-primary-rgb, 37, 99, 235);
+      --teal: var(--brand-accent, #0EA5E9);
+      --teal-rgb: var(--brand-accent-rgb, 14, 165, 233);
+      --gdk: #15803D;
+      --danger: #DC2626;
+      --bg: var(--brand-tint-bg, #F1F5FE);
+      --page: var(--brand-tint-page, #F7F9FE);
+      --border: var(--brand-tint-border, #E0E7FF);
+      --field: #F3F5F9;
+      --text-dark: var(--brand-secondary-deep, #0F1E42);
+      --text-muted: #64748B;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --wrap: 1180px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--page);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 32px; }
+
+    /* Demo strip: the demo's milestones (index.html shows them above the phone) */
+    #demo-strip {
+      background: var(--navy-deep);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+    }
+
+    #demo-strip .wrap { display: flex; align-items: center; gap: 18px; min-height: 40px; }
+    .demo-tag {
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px;
+      color: var(--teal); border: 1px solid rgba(var(--teal-rgb), 0.4); border-radius: 999px; padding: 3px 8px;
+    }
+
+    #jbar { display: flex; align-items: center; gap: 4px; flex: 1; flex-wrap: wrap; }
+    .jstep { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; }
+    .jdot {
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700;
+      background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5);
+    }
+    .jlbl { color: rgba(255, 255, 255, 0.55); }
+    .jsep { width: 14px; height: 1px; background: rgba(255, 255, 255, 0.15); }
+    .jstep.done .jdot { background: var(--gdk); color: white; }
+    .jstep.done .jlbl { color: #86EFAC; }
+    .jstep.active { background: rgba(var(--teal-rgb), 0.15); }
+    .jstep.active .jdot { background: var(--teal); color: white; box-shadow: 0 0 10px rgba(var(--teal-rgb), 0.6); }
+    .jstep.active .jlbl { color: white; font-weight: 600; }
+
+    #restart-btn {
+      background: none; border: 1px solid rgba(255, 255, 255, 0.2); color: white; border-radius: 8px;
+      padding: 5px 12px; font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    #restart-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+    /* Site header */
+    #site-header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: saturate(1.4) blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #site-header .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
+    .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; background: none; border: none; font-family: var(--font); }
+    .brand-name { font-size: 20px; font-weight: 800; color: var(--navy); letter-spacing: -0.01em; }
+    .logo-sm { width: 36px; height: 36px; display: block; }
+    .logo-md { width: 52px; height: 52px; display: block; }
+    .brand-logo-img { object-fit: contain; }
+
+    #nav { display: flex; gap: 4px; flex: 1; }
+    #nav a {
+      color: #475569; text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 8px 12px; border-radius: 8px;
+    }
+    #nav a:hover { background: var(--bg); color: var(--navy); }
+
+    #header-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 5px 12px 5px 5px; border: 1px solid var(--border); border-radius: 999px; background: white;
+    }
+    .user-chip .account-avatar { width: 30px; height: 30px; font-size: 12px; }
+    .user-chip .u-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .user-chip .u-sub { font-size: 11px; color: var(--text-muted); }
+
+    /* Sub bar: back + page title (index.html's app bar) */
+    #subbar { border-bottom: 1px solid var(--border); background: white; }
+    #subbar .wrap { display: flex; align-items: center; gap: 14px; height: 52px; }
+    #subbar.hidden { display: none; }
+    #back-btn {
+      display: none; align-items: center; gap: 6px;
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 12px; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--blue); cursor: pointer;
+    }
+    #back-btn.visible { display: inline-flex; }
+    #back-btn:hover { background: var(--bg); }
+    #page-title { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .crumb { font-size: 13px; color: var(--text-muted); }
+
+    #screen { flex: 1; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-hover));
+      color: white; border: none; border-radius: 12px;
+      padding: 13px 22px;
+      font-family: var(--font); font-size: 15px; font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(var(--blue-rgb), 0.28);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+      text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(var(--blue-rgb), 0.34); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-block { width: 100%; }
+    .btn-sm { padding: 9px 16px; font-size: 14px; border-radius: 10px; box-shadow: none; }
+    .btn-lg { padding: 16px 28px; font-size: 16px; }
+    .btn-outline { background: white; color: var(--blue); border: 1px solid var(--border); box-shadow: none; }
+    .btn-outline:hover { background: var(--bg); box-shadow: none; }
+    .btn-ghost-light { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: none; }
+    .btn-ghost-light:hover { background: rgba(255, 255, 255, 0.18); box-shadow: none; }
+
+    .link-sm {
+      background: none; border: none; color: var(--text-muted);
+      font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px;
+    }
+    .link-sm:hover:not(:disabled) { color: var(--blue); text-decoration: underline; }
+    .link-sm:disabled { opacity: 0.5; cursor: default; }
+
+    /* ===== Landing ===== */
+    .hero {
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(900px 420px at 85% -10%, rgba(var(--teal-rgb), 0.35), transparent 60%),
+        radial-gradient(700px 380px at -10% 110%, rgba(var(--blue-rgb), 0.45), transparent 60%),
+        linear-gradient(160deg, var(--navy-deep), var(--navy));
+      color: white;
+    }
+    .hero .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; padding-top: 72px; padding-bottom: 88px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+      padding: 6px 12px; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.18); color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 22px;
+    }
+    .hero h1 { font-size: 52px; line-height: 1.06; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 18px; }
+    .hero .lead { font-size: 18px; line-height: 1.6; color: rgba(255, 255, 255, 0.78); max-width: 540px; margin-bottom: 28px; }
+    .hero-ctas { display: flex; gap: 12px; margin-bottom: 32px; }
+    .hero-feats { display: flex; gap: 22px; flex-wrap: wrap; list-style: none; }
+    .hero-feats li { display: flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(255, 255, 255, 0.85); }
+    .hero-feats .tick {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(134, 239, 172, 0.18); color: #86EFAC;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .calc {
+      background: white; color: var(--text-dark);
+      border-radius: 24px; padding: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+    }
+    .calc-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+    .calc-title { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .calc-rate { font-size: 12px; font-weight: 600; color: var(--gdk); background: #DCFCE7; padding: 4px 10px; border-radius: 999px; }
+    .calc-lbl { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+    .calc-amt { font-size: 30px; font-weight: 800; color: var(--navy); letter-spacing: -0.01em; margin-bottom: 10px; }
+    .calc input[type="range"] { width: 100%; accent-color: var(--blue); margin-bottom: 4px; }
+    .calc-range { display: flex; justify-content: space-between; font-size: 11px; color: #94A3B8; margin-bottom: 18px; }
+    .calc-out {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin: 18px 0;
+    }
+    .calc-out > div { background: var(--page); padding: 12px 14px; }
+    .calc-out .k { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .calc-out .v { font-size: 18px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+    .calc-note { font-size: 11px; color: #94A3B8; text-align: center; margin-top: 10px; }
+
+    .stats { background: white; border-bottom: 1px solid var(--border); }
+    .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .stat { padding: 26px 0; border-right: 1px solid var(--border); text-align: center; }
+    .stat:last-child { border-right: none; }
+    .stat .v { font-size: 26px; font-weight: 800; color: var(--navy); }
+    .stat .k { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    .section { padding: 80px 0; }
+    #how, #rates, #privacy { scroll-margin-top: 68px; }
+    .section-head { text-align: center; max-width: 640px; margin: 0 auto 44px; }
+    .kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+    .section-head h2 { font-size: 34px; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 12px; }
+    .section-head p { font-size: 16px; color: var(--text-muted); line-height: 1.6; }
+
+    .how { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; counter-reset: how; }
+    .how-card {
+      background: white; border: 1px solid var(--border); border-radius: 20px; padding: 24px;
+      position: relative;
+    }
+    .how-card .num {
+      font-size: 12px; font-weight: 800; color: var(--blue);
+      background: var(--bg); border-radius: 8px; padding: 4px 8px; display: inline-block; margin-bottom: 16px;
+    }
+    .how-card .h-ico {
+      position: absolute; top: 22px; right: 22px;
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-hover)); color: white;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .how-card h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .how-card p { font-size: 14px; color: var(--text-muted); line-height: 1.55; }
+    .how-card .tag {
+      display: inline-flex; align-items: center; gap: 5px; margin-top: 14px;
+      font-size: 11px; font-weight: 700; color: var(--gdk); background: #DCFCE7; padding: 4px 8px; border-radius: 6px;
+    }
+
+    .privacy-band { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    .privacy-grid h2 { font-size: 34px; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 14px; }
+    .privacy-grid p { font-size: 16px; color: var(--text-muted); line-height: 1.65; margin-bottom: 14px; }
+    .consent-mock {
+      background: var(--page); border: 1px solid var(--border); border-radius: 20px; padding: 22px;
+    }
+    .cm-row {
+      display: flex; align-items: center; gap: 12px;
+      background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
+    }
+    .cm-row:last-child { margin-bottom: 0; }
+    .cm-row .r-ico { width: 36px; height: 36px; border-radius: 10px; background: rgba(var(--blue-rgb), 0.1); color: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .cm-row .t { font-size: 14px; font-weight: 600; color: var(--navy); }
+    .cm-row .d { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .pill { margin-left: auto; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+    .pill.req { background: var(--bg); color: var(--blue); }
+    .pill.opt { background: #F1F5F9; color: #64748B; }
+
+    .rights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .right-card {
+      display: flex; gap: 12px; align-items: flex-start; text-align: left;
+      background: white; border: 1px solid var(--border); border-radius: 16px; padding: 16px;
+      cursor: pointer; font-family: var(--font); transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+    .right-card:hover { border-color: var(--blue); box-shadow: 0 8px 20px rgba(var(--blue-rgb), 0.1); transform: translateY(-1px); }
+    .right-card .r-ico { width: 36px; height: 36px; border-radius: 10px; background: rgba(var(--blue-rgb), 0.1); color: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .right-card .r-title { font-size: 14px; font-weight: 600; color: var(--navy); }
+    .right-card .r-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.45; }
+
+    .cta-band {
+      margin: 0 auto; border-radius: 28px; padding: 44px 48px;
+      background: linear-gradient(135deg, var(--blue), var(--navy));
+      color: white; display: flex; align-items: center; justify-content: space-between; gap: 32px;
+    }
+    .cta-band h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .cta-band p { color: rgba(255, 255, 255, 0.8); font-size: 15px; }
+    .cta-band .btn { background: white; color: var(--navy); box-shadow: none; }
+
+    /* Site footer */
+    #site-footer { background: var(--navy-deep); color: rgba(255, 255, 255, 0.6); font-size: 13px; }
+    #site-footer .wrap { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; padding-top: 44px; padding-bottom: 28px; }
+    #site-footer h4 { color: white; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+    #site-footer p { line-height: 1.6; }
+    #site-footer .f-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    #site-footer .f-brand span { color: white; font-weight: 800; font-size: 17px; }
+    #site-footer button {
+      display: block; background: none; border: none; color: rgba(255, 255, 255, 0.6);
+      font-family: var(--font); font-size: 13px; cursor: pointer; padding: 4px 0; text-align: left;
+    }
+    #site-footer button:hover { color: white; }
+    .f-bottom { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+    .f-bottom .wrap { display: flex !important; justify-content: space-between; padding-top: 16px !important; padding-bottom: 16px !important; font-size: 12px; }
+
+    /* ===== Sign in (split) ===== */
+    .auth { padding: 48px 0 72px; }
+    .auth-grid {
+      display: grid; grid-template-columns: 1fr 460px; min-height: 560px;
+      background: white; border: 1px solid var(--border); border-radius: 28px; overflow: hidden;
+      box-shadow: 0 20px 50px rgba(15, 30, 66, 0.08);
+    }
+    .auth-side {
+      position: relative;
+      background:
+        radial-gradient(500px 300px at 100% 0%, rgba(var(--teal-rgb), 0.3), transparent 60%),
+        linear-gradient(160deg, var(--navy-deep), var(--navy));
+      color: white; padding: 48px;
+      display: flex; flex-direction: column;
+    }
+    .auth-side h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 12px; }
+    .auth-side > p { color: rgba(255, 255, 255, 0.75); line-height: 1.6; font-size: 15px; margin-bottom: 32px; max-width: 420px; }
+    .timeline { list-style: none; display: grid; gap: 4px; }
+    .timeline li { display: flex; gap: 14px; align-items: flex-start; position: relative; padding-bottom: 18px; }
+    .timeline li:not(:last-child)::before {
+      content: ""; position: absolute; left: 13px; top: 30px; bottom: 0; width: 2px; background: rgba(255, 255, 255, 0.12);
+    }
+    .timeline .t-dot {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6);
+    }
+    .timeline li.done .t-dot { background: var(--gdk); color: white; }
+    .timeline li.active .t-dot { background: var(--teal); color: white; box-shadow: 0 0 0 4px rgba(var(--teal-rgb), 0.25); }
+    .timeline .t-title { font-size: 14px; font-weight: 600; }
+    .timeline .t-desc { font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-top: 2px; }
+    .auth-side .secure { margin-top: auto; display: flex; gap: 10px; align-items: center; font-size: 12px; color: rgba(255, 255, 255, 0.65); }
+
+    .auth-form { padding: 44px 40px; display: flex; flex-direction: column; }
+    .auth-form .title { font-size: 24px; font-weight: 800; color: var(--navy); margin: 14px 0 6px; }
+    .auth-form .subtitle { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 22px; }
+
+    .label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin: 4px 0 8px; text-align: left; }
+    .demo-accounts { display: grid; gap: 8px; margin-bottom: 18px; }
+    .account-pill {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px 12px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; text-align: left; transition: all 0.2s;
+    }
+    .account-pill:hover { background: white; border-color: var(--teal); }
+    .account-pill.selected { background: white; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(var(--blue-rgb), 0.12); }
+    .account-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--teal); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 13px; flex-shrink: 0;
+    }
+    .account-name { font-size: 14px; font-weight: 600; color: var(--navy); }
+    .account-phone { font-size: 12px; color: var(--text-muted); }
+
+    .phone-field { display: flex; gap: 8px; background: var(--field); border-radius: 14px; padding: 5px; border: 1px solid transparent; }
+    .phone-field:focus-within { background: white; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(var(--blue-rgb), 0.12); }
+    .phone-field.invalid { border-color: var(--danger); }
+    .cc {
+      display: flex; align-items: center; gap: 6px;
+      background: white; border-radius: 10px; padding: 0 12px;
+      font-weight: 700; font-size: 14px; color: var(--text-dark);
+      box-shadow: 0 1px 3px rgba(15, 30, 66, 0.12);
+    }
+    .flag { width: 18px; height: 12px; border-radius: 2px; background: linear-gradient(#FF9933 0 33%, #fff 33% 66%, #138808 66%); box-shadow: 0 0 0 1px #e2e8f0; }
+    .phone-field input {
+      flex: 1; min-width: 0; border: none; background: transparent;
+      padding: 12px 6px; font-family: var(--font); font-size: 16px; font-weight: 600; color: var(--text-dark); letter-spacing: 0.5px;
+    }
+    .phone-field input:focus { outline: none; }
+
+    .otp-inputs { display: flex; gap: 10px; justify-content: flex-start; margin: 8px 0 14px; }
+    .otp-digit {
+      width: 52px; height: 58px;
+      border: 1px solid transparent; border-radius: 12px; background: var(--field);
+      text-align: center; font-size: 22px; font-weight: 700; color: var(--blue); font-family: var(--font);
+      box-shadow: inset 0 1px 2px rgba(15, 30, 66, 0.08);
+    }
+    .otp-digit:focus { outline: none; background: white; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(var(--blue-rgb), 0.12); }
+    .hint {
+      font-size: 13px; color: var(--text-muted); margin-bottom: 12px;
+      background: var(--bg); border-radius: 10px; padding: 8px 12px;
+    }
+    .resend-row { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; font-size: 13px; color: var(--text-muted); }
+    .timer { border: 1px solid var(--border); border-radius: 8px; padding: 2px 8px; font-weight: 600; color: var(--text-dark); }
+    .auth-foot { margin-top: auto; padding-top: 20px; display: flex; gap: 8px; align-items: center; color: #CBD5E1; }
+
+    /* ===== Application shell ===== */
+    .app { padding: 36px 0 72px; }
+    .app-grid { display: grid; grid-template-columns: 280px 1fr; gap: 28px; align-items: start; }
+    .aside { position: sticky; top: 92px; display: grid; gap: 16px; }
+    .panel { background: white; border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .panel-title { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; }
+
+    .vsteps { list-style: none; }
+    .vsteps li { display: flex; gap: 12px; position: relative; padding-bottom: 20px; }
+    .vsteps li:last-child { padding-bottom: 0; }
+    .vsteps li:not(:last-child)::before {
+      content: ""; position: absolute; left: 15px; top: 34px; bottom: 2px; width: 2px; background: var(--field);
+    }
+    .vsteps li.done:not(:last-child)::before { background: var(--gdk); }
+    .sdot {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      background: var(--field); color: #94A3B8;
+      box-shadow: inset 0 1px 2px rgba(15, 30, 66, 0.08);
+    }
+    .sdot.active { background: linear-gradient(135deg, var(--blue), var(--blue-hover)); color: white; box-shadow: 0 0 0 4px rgba(var(--blue-rgb), 0.15); }
+    .sdot.done { background: var(--gdk); color: white; }
+    .vsteps .s-title { font-size: 14px; font-weight: 600; color: var(--navy); padding-top: 6px; }
+    .vsteps .s-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .vsteps li.todo .s-title { color: #94A3B8; }
+
+    .mini-rows .row { padding: 7px 0; }
+    .est { font-size: 24px; font-weight: 800; color: var(--navy); }
+    .est-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .main-head { margin-bottom: 20px; }
+    .main-head .step-of { font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+    .main-head h1 { font-size: 28px; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; }
+    .main-head p { font-size: 15px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+
+    .form-card { background: white; border: 1px solid var(--border); border-radius: 22px; padding: 28px; box-shadow: 0 10px 30px rgba(15, 30, 66, 0.05); }
+    .form-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .form-sub { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+
+    .card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 16px; text-align: left; }
+    .card-title { font-weight: 600; color: var(--navy); margin-bottom: 6px; font-size: 14px; }
+    .card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    .fsection { padding: 22px 0; border-top: 1px solid var(--border); }
+    .fsection:first-of-type { border-top: none; padding-top: 4px; }
+    .fsection-head { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
+    .fsection-head .f-ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(var(--blue-rgb), 0.1); color: var(--blue); display: flex; align-items: center; justify-content: center; }
+    .section-title { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .section-sub { font-size: 12px; color: var(--text-muted); }
+
+    .fgrid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; }
+    .fcell.wide { grid-column: 1 / -1; }
+
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #64748B; margin: 12px 0 6px; }
+    .field { position: relative; }
+    .field .ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94A3B8; pointer-events: none; }
+    .field .chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748B; pointer-events: none; }
+    .field input,
+    .field select {
+      width: 100%; padding: 12px 12px 12px 38px;
+      background: var(--field); border: 1px solid transparent; border-radius: 12px;
+      font-family: var(--font); font-size: 14px; color: var(--text-dark);
+      appearance: none; -webkit-appearance: none;
+    }
+    .field select { padding-right: 34px; cursor: pointer; }
+    .field select:disabled { color: #94A3B8; cursor: not-allowed; }
+    .field input::placeholder { color: #94A3B8; }
+    .field input:focus,
+    .field select:focus { outline: none; background: white; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(var(--blue-rgb), 0.12); }
+    .field.invalid input,
+    .field.invalid select { border-color: var(--danger); background: #FEF2F2; }
+    .field-error { font-size: 12px; color: var(--danger); margin-top: 4px; }
+    .field-error:empty { display: none; }
+    .center { text-align: center; }
+
+    .choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .choice {
+      background: var(--field); border: 1px solid transparent; border-radius: 14px;
+      padding: 14px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; font-family: var(--font); font-size: 14px; font-weight: 600; color: #64748B;
+    }
+    .choice .choice-ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #E2E8F0; color: #64748B; }
+    .choice.selected { background: white; border-color: var(--blue); color: var(--blue); box-shadow: 0 6px 14px rgba(var(--blue-rgb), 0.15); }
+    .choice.selected .choice-ico { background: var(--blue); color: white; }
+    .choice-row.invalid .choice { border-color: var(--danger); }
+
+    .form-actions { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 22px; border-top: 1px solid var(--border); margin-top: 8px; }
+    .form-actions .note { font-size: 12px; color: var(--text-muted); display: flex; gap: 6px; align-items: center; }
+
+    /* Consent gate (application) */
+    .data-groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+    .data-group { background: var(--page); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+    .data-group .g-ico { width: 36px; height: 36px; border-radius: 10px; background: white; color: var(--blue); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 1px solid var(--border); }
+    .data-group h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .data-group ul { list-style: none; display: grid; gap: 5px; }
+    .data-group li { font-size: 13px; color: var(--text-muted); display: flex; gap: 6px; align-items: center; }
+    .data-group li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--blue); opacity: 0.5; }
+    .choice-band { display: flex; gap: 14px; align-items: center; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 16px; padding: 16px 18px; margin-bottom: 22px; }
+    .choice-band .t { font-size: 14px; font-weight: 700; color: var(--navy); }
+    .choice-band .d { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .choice-band .pill { margin-left: auto; }
+
+    /* Offer */
+    .check-list { max-width: 460px; margin: 10px auto 6px; }
+    .check-step { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; }
+    .check-ind { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--field); display: flex; align-items: center; justify-content: center; color: white; }
+    .check-ind.spinning { border: 3px solid rgba(var(--blue-rgb), 0.2); border-top-color: var(--blue); background: transparent; animation: spin 0.8s linear infinite; }
+    .check-ind.done { background: var(--gdk); }
+    .check-label { font-size: 14px; font-weight: 500; color: var(--navy); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .offer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .offer-hero {
+      background:
+        radial-gradient(400px 200px at 100% 0%, rgba(var(--teal-rgb), 0.35), transparent 60%),
+        linear-gradient(135deg, var(--blue), var(--navy));
+      color: white; border-radius: 18px; padding: 26px; margin-bottom: 18px;
+    }
+    .offer-hero .lbl { font-size: 13px; opacity: 0.85; }
+    .offer-hero .amt { font-size: 40px; font-weight: 800; margin: 4px 0; letter-spacing: -0.02em; }
+    .offer-hero .note { font-size: 12px; opacity: 0.85; }
+
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .chip { border: 1px solid var(--border); background: white; color: var(--navy); border-radius: 999px; padding: 8px 14px; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; }
+    .chip:hover { border-color: var(--blue); }
+    .chip.selected { background: var(--blue); border-color: var(--blue); color: white; }
+
+    .rows { border: 1px solid var(--border); border-radius: 14px; padding: 4px 14px; }
+    .row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px; border-bottom: 1px dashed var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row span:first-child { color: var(--text-muted); }
+    .row span:last-child { font-weight: 600; color: var(--navy); }
+
+    .plan { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; text-align: left; }
+    .plan:hover { border-color: var(--teal); }
+    .plan.selected { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(var(--blue-rgb), 0.12); }
+    .plan .radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #CBD5E1; margin-top: 1px; flex-shrink: 0; }
+    .plan.selected .radio { border-color: var(--blue); background: radial-gradient(var(--blue) 45%, transparent 50%); }
+    .plan-name { font-size: 14px; font-weight: 600; color: var(--navy); }
+    .plan-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Applied */
+    .applied-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+    .success-head { display: flex; gap: 16px; align-items: center; margin-bottom: 18px; }
+    .success-tick { width: 56px; height: 56px; border-radius: 50%; background: var(--gdk); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 8px 20px rgba(21, 128, 61, 0.3); }
+    .app-no { display: inline-block; background: var(--bg); border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--navy); margin-top: 6px; }
+    .next-list { list-style: none; display: grid; gap: 10px; margin: 18px 0; }
+    .next-list li { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--text-dark); }
+    .next-list .n { width: 26px; height: 26px; border-radius: 8px; background: var(--bg); color: var(--blue); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .applied-grid .rights-grid { grid-template-columns: 1fr; gap: 10px; }
+    .applied-grid .right-card { padding: 12px 14px; align-items: center; }
+
+    /* Certificates */
+    .cert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    .cert {
+      display: flex; flex-direction: column; gap: 10px; text-align: left; font-family: var(--font);
+      background: white; border: 1px solid var(--border); border-radius: 16px; padding: 18px; cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .cert:hover { border-color: var(--blue); box-shadow: 0 8px 20px rgba(var(--blue-rgb), 0.1); }
+    .cert .c-ico { width: 40px; height: 40px; border-radius: 12px; background: #DCFCE7; color: var(--gdk); display: flex; align-items: center; justify-content: center; }
+    .cert .c-name { font-size: 14px; font-weight: 600; color: var(--navy); line-height: 1.4; }
+    .cert .c-date { font-size: 12px; color: var(--text-muted); }
+    .cert .c-dl { margin-top: auto; font-size: 13px; font-weight: 600; color: var(--blue); display: flex; gap: 6px; align-items: center; }
+
+    /* Narrow windows: stack the columns */
+    @media (max-width: 980px) {
+      .wrap { padding: 0 16px; }
+      #nav { display: none; }
+      .hero .wrap, .privacy-grid, .auth-grid, .app-grid, .offer-grid, .applied-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 38px; }
+      .how, .rights-grid, .data-groups, .cert-grid { grid-template-columns: 1fr 1fr; }
+      .stats .wrap { grid-template-columns: 1fr 1fr; }
+      .aside { position: static; }
+      .cta-band { flex-direction: column; align-items: flex-start; }
+      #site-footer .wrap { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .how, .rights-grid, .data-groups, .cert-grid, .fgrid, .applied-grid .rights-grid { grid-template-columns: 1fr; }
+      .auth-side, .auth-form { padding: 28px 20px; }
+      .otp-digit { width: 42px; height: 50px; }
+      .demo-tag, .jlbl { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="demo-strip">
+    <div class="wrap">
+      <span class="demo-tag">Demo journey</span>
+      <div id="jbar"></div>
+      <button id="restart-btn">Restart Demo</button>
+    </div>
+  </div>
+
+  <header id="site-header">
+    <div class="wrap">
+      <button class="brand" onclick="goHome()" aria-label="Home">
+        <span data-brand-logo="logo-sm"></span>
+        <span class="brand-name" data-brand-text="shortName"></span>
+      </button>
+      <nav id="nav"></nav>
+      <div id="header-right"></div>
+    </div>
+  </header>
+
+  <div id="subbar" class="hidden">
+    <div class="wrap">
+      <button id="back-btn" aria-label="Back">← Back</button>
+      <span id="page-title"></span>
+    </div>
+  </div>
+
+  <main id="screen"></main>
+
+  <footer id="site-footer">
+    <div class="wrap">
+      <div>
+        <div class="f-brand"><span data-brand-logo="logo-sm"></span><span data-brand-text="shortName"></span></div>
+        <p>Personal loans with paperless KYC. We ask only for the data each step needs, and you can review or withdraw your consent at any time.</p>
+      </div>
+      <div>
+        <h4>Your privacy</h4>
+        <button onclick="openRights('notice')">Privacy Policy</button>
+        <button onclick="openRights('preferences')">Manage consent</button>
+        <button onclick="openRights('data-access')">Access my data</button>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <button onclick="openRights('grievance')">Grievance Officer</button>
+        <button onclick="openRights('nominee')">Register a nominee</button>
+        <button onclick="openRights('breaches')">Breach notifications</button>
+      </div>
+      <div>
+        <h4>Loans</h4>
+        <button onclick="goHome('how')">How it works</button>
+        <button onclick="goHome('rates')">Rates &amp; fees</button>
+        <button onclick="goHome('calc')">EMI calculator</button>
+      </div>
+    </div>
+    <div class="f-bottom">
+      <div class="wrap">
+        <span>© <span id="year"></span> <span data-brand-text="fullName"></span>. Demo only.</span>
+        <span>Consent managed with e-Sahamati · DPDP Act, 2023</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ====== Configuration ======
+    const __CFG = window.DEMO_CONFIG || {};
+    const ORG_ID = __CFG.ORG_ID || "org-quicklend-001";
+    const API_BASE = __CFG.API_BASE || "http://localhost:4000/api/v1";
+    const CONSENT_UI = __CFG.CONSENT_UI || "http://localhost:3000";
+    // Loan figures from config/brand.js (product); see js/brand.js for defaults.
+    const PRODUCT = NbfcBrand.product();
+    const STATES = window.INDIA_STATES || {};
+
+    // Seeded data principals of the QuickLend org; config/env.js DEMO_ACCOUNTS
+    // replaces them for an organisation with its own principals. A number only
+    // signs in if it is a data principal of ORG_ID (an unknown number gets a fake
+    // "sent" from the API and no code), so the sign-in screen offers these.
+    const DEMO_ACCOUNTS = (Array.isArray(__CFG.DEMO_ACCOUNTS) && __CFG.DEMO_ACCOUNTS.length > 0
+      ? __CFG.DEMO_ACCOUNTS
+      : [
+          { name: "Priya Sharma", phone: "+91-9876543210" },
+          { name: "Rahul Mehta", phone: "+91-9876543211" },
+          { name: "Anjali Patel", phone: "+91-9876543212" }
+        ]
+    ).map(acc => ({
+      name: String(acc.name || ""),
+      phone: String(acc.phone || "").replace(/\D/g, "").slice(-10),
+      avatar: String(acc.name || "?").trim().charAt(0).toUpperCase()
+    }));
+
+    // Config and user values are inserted into HTML strings; escape them first.
+    function escapeHtml(text) {
+      return NbfcBrand.escape(text);
+    }
+
+    // ====== State ======
+    function emptyForm() {
+      return {
+        loanAmount: String(PRODUCT.amount), income: "", salaryDate: "", purpose: "",
+        email: "", address: "", state: "", city: "", pin: "",
+        employment: "", company: "", officeAddress: ""
+      };
+    }
+
+    function defaultTenure() {
+      return PRODUCT.tenureOptions.includes(PRODUCT.tenureMonths) ? PRODUCT.tenureMonths : PRODUCT.tenureOptions[0];
+    }
+
+    const STATE = {
+      currentScreen: "welcome",
+      authToken: null,
+      principalId: null,
+      otpRequestId: null,
+      phone: "",
+      name: "",
+      form: emptyForm(),
+      // Tenure picked on the home page's EMI calculator; Step 2 starts from it.
+      tenure: defaultTenure(),
+      offer: null,
+      offerReady: false,
+      applicationId: null,
+      artifacts: null,
+      resendTimer: null
+    };
+
+    // ====== Journey ======
+    // Same journey as index.html:
+    //   welcome → [consent 1: nbfc-sign-in-consent] → mobile → otp
+    //   → application → [consent 2: nbfc-application-consent] → details (Step 1)
+    //   → offer (Step 2) → applied (Step 3) → artifacts
+    const ORDER = ["welcome", "mobile", "otp", "application", "details", "offer", "applied", "artifacts"];
+    const BACK = { mobile: "welcome", otp: "mobile", details: "application", offer: "details", artifacts: "applied" };
+
+    // Demo strip: the demo's milestones, and which one each screen is in.
+    const MILESTONES = ["Notice", "Sign in", "Consent", "Details", "Offer", "Applied"];
+    const MILESTONE_OF = { welcome: 0, mobile: 1, otp: 1, application: 2, details: 3, offer: 4, applied: 5, artifacts: 5 };
+
+    // Screen to open after its consent screen is accepted (or an all-optional one declined).
+    const NEXT_SCREEN = { welcome: "mobile", application: "details" };
+
+    // ====== Icons ======
+    const ICON_PATHS = {
+      check: '<polyline points="20 6 9 17 4 12"/>',
+      lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+      rupee: '<path d="M6 4h12M6 9h12M14 20 7 13h2a4 4 0 0 0 0-9"/>',
+      wallet: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h2M3 10h18"/>',
+      calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>',
+      list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+      mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+      pin: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+      map: '<path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/>',
+      hash: '<path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/>',
+      building: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M11 21v-3h2v3"/>',
+      badge: '<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M9 6V4h6v2M8 12h3M8 16h8M15 11.5a1.5 1.5 0 1 0 0 .01"/>',
+      store: '<path d="M4 9 5 4h14l1 5M4 9h16v2a3 3 0 0 1-5.5 1.6A3 3 0 0 1 12 14a3 3 0 0 1-2.5-1.4A3 3 0 0 1 4 11zM5 13v8h14v-8"/>',
+      chevron: '<polyline points="6 9 12 15 18 9"/>',
+      shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+      doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+      user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+      bell: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+      sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+      alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+      phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+      zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+      arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+      download: '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+      eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'
+    };
+
+    function icon(name, cls, size) {
+      const s = size || 16;
+      return `<svg class="${cls || ""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ""}</svg>`;
+    }
+
+    // ====== Shared pieces ======
+    function maskedPhone() {
+      const d = STATE.phone;
+      return d.length === 10 ? d.slice(0, 2) + "******" + d.slice(-2) : d;
+    }
+
+    const RIGHTS = [
+      ["data-access", "shield", "Access my data", "Download everything we hold (S.11)"],
+      ["preferences", "sliders", "Manage / withdraw consent", "Change any optional purpose (S.6)"],
+      ["grievance", "bell", "File a grievance", "Reach our Grievance Officer (S.13)"],
+      ["nominee", "user", "Register a nominee", "For incapacity or death (S.14)"],
+      ["pwd-guardian", "shield", "Guardianship verification", "Lawful-guardian upload (S.9(3), Rule 11)"],
+      ["breaches", "alert", "Breach notifications", "Incidents affecting your data"]
+    ];
+
+    function rightsGrid() {
+      return `
+        <div class="rights-grid">
+          ${RIGHTS.map(([slug, ic, title, desc]) => `
+            <button class="right-card" onclick="openRights('${slug}')">
+              <span class="r-ico">${icon(ic, "", 17)}</span>
+              <span><div class="r-title">${title}</div><div class="r-desc">${desc}</div></span>
+            </button>`).join("")}
+        </div>`;
+    }
+
+    // Left column of the sign-in screens: where the visitor is in the journey.
+    function authSide(active) {
+      const items = [
+        ["Privacy notice", "Consent for your mobile number"],
+        ["Sign in", "Verify with a one-time code"],
+        ["Application consent", "One consent for your loan details"],
+        ["Apply", "Details, offer, done"]
+      ];
+      return `
+        <div class="auth-side">
+          <h2>Secure sign-in,<br>no paperwork.</h2>
+          <p>We use your mobile number only to verify you and send updates on your application, as you agreed on the privacy notice.</p>
+          <ul class="timeline">
+            ${items.map(([t, d], i) => `
+              <li class="${i < active ? "done" : i === active ? "active" : ""}">
+                <span class="t-dot">${i < active ? icon("check", "", 14) : i + 1}</span>
+                <span><div class="t-title">${t}</div><div class="t-desc">${d}</div></span>
+              </li>`).join("")}
+          </ul>
+          <div class="secure">${icon("lock", "", 14)} Your data is encrypted &amp; secure</div>
+        </div>`;
+    }
+
+    function authFoot() {
+      return `
+        <div class="auth-foot">
+          <button class="link-sm" onclick="openRights('grievance')">Need help?</button>
+          <span>|</span>
+          <button class="link-sm" onclick="openRights('notice')">Privacy Policy</button>
+        </div>`;
+    }
+
+    // Left column of the application pages: Step N of 3 (index.html's stepper) and a summary.
+    function appAside(step) {
+      const steps = [
+        ["Application consent", "What we'll ask, and why"],
+        ["Personal Details", "Income, contact, employment"],
+        ["Eligibility & Offer", "Checks and your loan offer"],
+        ["Application Submitted", "E-sign and payout"]
+      ];
+      const amount = STATE.offer ? STATE.offer.amount : Number(STATE.form.loanAmount) || 0;
+      const tenure = STATE.offer ? STATE.offer.tenure : STATE.tenure;
+      return `
+        <aside class="aside">
+          <div class="panel">
+            <div class="panel-title">Your application</div>
+            <ol class="vsteps">
+              ${steps.map(([t, d], i) => {
+                const cls = i < step ? "done" : i === step ? "active" : "todo";
+                const label = i === 0 ? icon("shield", "", 14) : i;
+                return `
+                  <li class="${cls}">
+                    <span class="sdot ${cls === "todo" ? "" : cls}">${i < step ? icon("check", "", 14) : label}</span>
+                    <span><div class="s-title">${escapeHtml(t)}</div><div class="s-desc">${i === 0 ? "" : "Step " + i + " of 3 · "}${escapeHtml(d)}</div></span>
+                  </li>`;
+              }).join("")}
+            </ol>
+          </div>
+          <div class="panel">
+            <div class="panel-title">${STATE.offer ? "Your offer" : "Estimated EMI"}</div>
+            <div class="est" id="est-emi">${NbfcBrand.formatInr(NbfcBrand.emiFor(amount, tenure))}<span style="font-size: 13px; color: var(--text-muted); font-weight: 600;"> /month</span></div>
+            <div class="est-sub" id="est-sub">${NbfcBrand.formatInr(amount)} over ${tenure} months at ${PRODUCT.interestRate}% p.a.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-title">Your privacy</div>
+            <p class="card-desc" style="margin-bottom: 10px;">You can review or withdraw any optional consent at any time.</p>
+            <button class="link-sm" style="padding-left: 0;" onclick="openRights('preferences')">Manage consent →</button>
+          </div>
+        </aside>`;
+    }
+
+    function updateEstimate() {
+      const emi = document.getElementById("est-emi");
+      if (!emi || STATE.offer) return;
+      const amount = Number(STATE.form.loanAmount) || 0;
+      emi.firstChild.textContent = NbfcBrand.formatInr(NbfcBrand.emiFor(amount, STATE.tenure));
+      document.getElementById("est-sub").textContent =
+        NbfcBrand.formatInr(amount) + " over " + STATE.tenure + " months at " + PRODUCT.interestRate + "% p.a.";
+    }
+
+    function mainHead(stepText, title, sub) {
+      return `
+        <div class="main-head">
+          ${stepText ? `<div class="step-of">${stepText}</div>` : ""}
+          <h1>${title}</h1>
+          ${sub ? `<p>${sub}</p>` : ""}
+        </div>`;
+    }
+
+    function field(key, label, iconName, opts) {
+      const o = opts || {};
+      const value = STATE.form[key] || "";
+      const shown = o.money && value ? Number(value).toLocaleString("en-IN") : value;
+      return `
+        <div class="fcell ${o.wide ? "wide" : ""}">
+          <label class="field-label" for="f-${key}">${label}</label>
+          <div class="field" id="w-${key}">
+            ${icon(iconName, "ico")}
+            <input id="f-${key}" type="${o.type || "text"}" ${o.inputmode ? `inputmode="${o.inputmode}"` : ""}
+              ${o.maxlength ? `maxlength="${o.maxlength}"` : ""} placeholder="${escapeHtml(o.placeholder || "")}"
+              value="${escapeHtml(shown)}" autocomplete="off"
+              oninput="${o.money ? "setMoney" : o.digits ? "setDigits" : "setField"}('${key}', this)">
+          </div>
+          <div class="field-error" id="err-${key}"></div>
+        </div>`;
+    }
+
+    function selectField(key, label, iconName, options, opts) {
+      const o = opts || {};
+      const value = STATE.form[key] || "";
+      return `
+        <label class="field-label" for="f-${key}">${label}</label>
+        <div class="field" id="w-${key}">
+          ${icon(iconName, "ico")}
+          <select id="f-${key}" ${o.disabled ? "disabled" : ""} onchange="${o.onchange || "setField"}('${key}', this)">
+            <option value="">${escapeHtml(o.placeholder || "Select")}</option>
+            ${options.map(v => `<option value="${escapeHtml(v)}" ${v === value ? "selected" : ""}>${escapeHtml(v)}</option>`).join("")}
+          </select>
+          ${icon("chevron", "chev")}
+        </div>
+        <div class="field-error" id="err-${key}"></div>`;
+    }
+
+    // ====== Screens ======
+    const SCREENS = {
+      // The landing page. "Get Started" opens consent screen 1, as on index.html.
+      welcome() {
+        const brand = NbfcBrand.get();
+        const amount = Number(STATE.form.loanAmount) || PRODUCT.amount;
+        return `
+          <section class="hero">
+            <div class="wrap">
+              <div>
+                <span class="eyebrow">${icon("shield", "", 14)} Privacy-first ${escapeHtml(PRODUCT.name.toLowerCase())}s</span>
+                <h1 data-brand-text="tagline">${escapeHtml(brand.tagline)}</h1>
+                <p class="lead">Borrow up to ${NbfcBrand.formatInrShort(PRODUCT.maxAmount)} with paperless KYC and money in your account in ${escapeHtml(PRODUCT.payoutTime)}. We ask only for the data each step needs, and tell you why.</p>
+                <div class="hero-ctas">
+                  <button class="btn btn-lg" onclick="showConsentModal('signin')">Get Started ${icon("arrow", "", 18)}</button>
+                  <a class="btn btn-lg btn-ghost-light" href="#how">How it works</a>
+                </div>
+                <ul class="hero-feats">
+                  <li><span class="tick">${icon("check", "", 12)}</span> Instant eligibility check</li>
+                  <li><span class="tick">${icon("check", "", 12)}</span> Paperless KYC, no branch visit</li>
+                  <li><span class="tick">${icon("check", "", 12)}</span> Funds in ${escapeHtml(PRODUCT.payoutTime)}</li>
+                </ul>
+              </div>
+              <div class="calc" id="calc">
+                <div class="calc-head">
+                  <span class="calc-title">EMI calculator</span>
+                  <span class="calc-rate">${PRODUCT.interestRate}% p.a.</span>
+                </div>
+                <div class="calc-lbl"><span>Loan amount</span></div>
+                <div class="calc-amt" id="calc-amt">${NbfcBrand.formatInr(amount)}</div>
+                <input type="range" min="${PRODUCT.minAmount}" max="${PRODUCT.maxAmount}" step="${PRODUCT.amountStep}"
+                  value="${amount}" oninput="setCalcAmount(this.value)" aria-label="Loan amount">
+                <div class="calc-range"><span>${NbfcBrand.formatInrShort(PRODUCT.minAmount)}</span><span>${NbfcBrand.formatInrShort(PRODUCT.maxAmount)}</span></div>
+                <div class="calc-lbl"><span>Tenure</span></div>
+                <div class="chips" id="calc-tenure" style="margin-bottom: 0;">
+                  ${PRODUCT.tenureOptions.map(n => `<button class="chip ${n === STATE.tenure ? "selected" : ""}" onclick="setCalcTenure(${n})">${n} months</button>`).join("")}
+                </div>
+                <div class="calc-out" id="calc-out">${calcOut()}</div>
+                <button class="btn btn-block" onclick="showConsentModal('signin')">Apply for this loan</button>
+                <div class="calc-note">Indicative. Your offer depends on your income and checks.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="stats" id="rates">
+            <div class="wrap">
+              <div class="stat"><div class="v">${PRODUCT.interestRate}%</div><div class="k">Interest p.a. from</div></div>
+              <div class="stat"><div class="v">${NbfcBrand.formatInrShort(PRODUCT.maxAmount)}</div><div class="k">Borrow up to</div></div>
+              <div class="stat"><div class="v">${Math.max.apply(null, PRODUCT.tenureOptions)} months</div><div class="k">Longest tenure</div></div>
+              <div class="stat"><div class="v">${PRODUCT.processingFeePercent}%</div><div class="k">Processing fee</div></div>
+            </div>
+          </section>
+
+          <section class="section" id="how">
+            <div class="wrap">
+              <div class="section-head">
+                <div class="kicker">How it works</div>
+                <h2>From notice to offer in minutes</h2>
+                <p>Two short consent screens, each asking only for the data the next steps collect.</p>
+              </div>
+              <div class="how">
+                <div class="how-card">
+                  <span class="h-ico">${icon("doc", "", 18)}</span>
+                  <span class="num">01</span>
+                  <h3>Read the privacy notice</h3>
+                  <p>See why we need your mobile number, then choose what you agree to.</p>
+                  <span class="tag">${icon("shield", "", 12)} Consent 1</span>
+                </div>
+                <div class="how-card">
+                  <span class="h-ico">${icon("phone", "", 18)}</span>
+                  <span class="num">02</span>
+                  <h3>Sign in with OTP</h3>
+                  <p>Verify your mobile number with a one-time code. No passwords.</p>
+                </div>
+                <div class="how-card">
+                  <span class="h-ico">${icon("user", "", 18)}</span>
+                  <span class="num">03</span>
+                  <h3>Tell us about yourself</h3>
+                  <p>One consent for your income, contact and employment details, then fill them in.</p>
+                  <span class="tag">${icon("shield", "", 12)} Consent 2</span>
+                </div>
+                <div class="how-card">
+                  <span class="h-ico">${icon("zap", "", 18)}</span>
+                  <span class="num">04</span>
+                  <h3>Get your offer</h3>
+                  <p>Pick a tenure, add protection if you want it, and apply.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section privacy-band" id="privacy">
+            <div class="wrap">
+              <div class="privacy-grid">
+                <div>
+                  <div class="kicker">Your data, your choice</div>
+                  <h2>You decide what we use, and for what</h2>
+                  <p>Every consent screen lists each purpose, the data it uses and who it is shared with. Required purposes are the ones we cannot lend without; the rest are up to you.</p>
+                  <p>After you apply you can download a certificate for every consent, and change or withdraw them whenever you like.</p>
+                  <button class="btn btn-outline" onclick="openRights('notice')">${icon("eye", "", 16)} Read our privacy notice</button>
+                </div>
+                <div class="consent-mock">
+                  <div class="cm-row">
+                    <span class="r-ico">${icon("phone", "", 17)}</span>
+                    <span><div class="t">Mobile number verification</div><div class="d">To sign you in with a one-time code</div></span>
+                    <span class="pill req">Required</span>
+                  </div>
+                  <div class="cm-row">
+                    <span class="r-ico">${icon("wallet", "", 17)}</span>
+                    <span><div class="t">Loan eligibility and offer</div><div class="d">Income, salary date, loan purpose</div></span>
+                    <span class="pill req">Required</span>
+                  </div>
+                  <div class="cm-row">
+                    <span class="r-ico">${icon("mail", "", 17)}</span>
+                    <span><div class="t">Offers by email</div><div class="d">Only if you say yes</div></span>
+                    <span class="pill opt">Optional</span>
+                  </div>
+                  <div class="cm-row">
+                    <span class="r-ico">${icon("shield", "", 17)}</span>
+                    <span><div class="t">Loan protection offers</div><div class="d">From our insurance partners</div></span>
+                    <span class="pill opt">Optional</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="wrap">
+              <div class="section-head">
+                <div class="kicker">Your data rights</div>
+                <h2>Under the DPDP Act, 2023</h2>
+                <p>Use any of these at any time. Each opens our consent portal in a new tab.</p>
+              </div>
+              ${rightsGrid()}
+            </div>
+          </section>
+
+          <section style="padding: 0 0 80px;">
+            <div class="wrap">
+              <div class="cta-band">
+                <div>
+                  <h2>Ready when you are</h2>
+                  <p>Check your eligibility now. It takes a few minutes and does not affect your credit score.</p>
+                </div>
+                <button class="btn btn-lg" onclick="showConsentModal('signin')">Get Started ${icon("arrow", "", 18)}</button>
+              </div>
+            </div>
+          </section>`;
+      },
+
+      mobile() {
+        return `
+          <section class="auth">
+            <div class="wrap">
+              <div class="auth-grid">
+                ${authSide(1)}
+                <div class="auth-form">
+                  <div data-brand-logo="logo-md">${NbfcBrand.logoHtml("logo-md")}</div>
+                  <h2 class="title">Welcome Back</h2>
+                  <p class="subtitle">Securely sign in to continue your application</p>
+                  <span class="label">Choose a demo customer</span>
+                  <div class="demo-accounts">
+                    ${DEMO_ACCOUNTS.map((acc, i) => `
+                      <div class="account-pill ${acc.phone === STATE.phone ? "selected" : ""}" onclick="selectAccount(${i})">
+                        <div class="account-avatar">${escapeHtml(acc.avatar)}</div>
+                        <div>
+                          <div class="account-name">${escapeHtml(acc.name)}</div>
+                          <div class="account-phone">+91 ${escapeHtml(acc.phone)}</div>
+                        </div>
+                      </div>`).join("")}
+                  </div>
+                  <label class="label" for="phone-input">Mobile Number</label>
+                  <div class="phone-field" id="phone-wrap">
+                    <span class="cc"><span class="flag"></span>+91</span>
+                    <input id="phone-input" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit number"
+                      value="${escapeHtml(STATE.phone)}" oninput="onPhoneInput(this)" onkeydown="if (event.key === 'Enter') startOtpFlow()">
+                  </div>
+                  <div class="field-error" id="phone-error"></div>
+                  <button class="btn btn-block" id="get-otp" style="margin-top: 18px;" onclick="startOtpFlow()">Get OTP</button>
+                  ${authFoot()}
+                </div>
+              </div>
+            </div>
+          </section>`;
+      },
+
+      otp() {
+        return `
+          <section class="auth">
+            <div class="wrap">
+              <div class="auth-grid">
+                ${authSide(1)}
+                <div class="auth-form">
+                  <div data-brand-logo="logo-md">${NbfcBrand.logoHtml("logo-md")}</div>
+                  <h2 class="title">Verify OTP</h2>
+                  <p class="subtitle">Enter the code sent to <strong>+91 ${escapeHtml(maskedPhone())}</strong></p>
+                  <div class="otp-inputs">
+                    ${Array(6).fill(0).map((_, i) => `<input type="text" class="otp-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit ${i + 1}">`).join("")}
+                  </div>
+                  <div class="hint">Demo OTP: <strong>123456</strong></div>
+                  <div class="field-error" id="otp-error"></div>
+                  <button class="btn btn-block" id="verify-btn" style="margin-top: 8px;" onclick="verifyOTP()">Verify &amp; Continue</button>
+                  <div class="resend-row">
+                    <span>Didn't receive code?</span>
+                    <span>
+                      <button class="link-sm" id="resend-btn" onclick="resendOTP()" disabled>Resend</button>
+                      <span class="timer" id="resend-timer">0:30</span>
+                    </span>
+                  </div>
+                  <button class="link-sm" style="margin-top: 8px; align-self: flex-start; padding-left: 0;" onclick="goTo('mobile')">Change number</button>
+                  ${authFoot()}
+                </div>
+              </div>
+            </div>
+          </section>`;
+      },
+
+      // Consent screen 2 is opened from here: one consent for everything after it.
+      application() {
+        const who = escapeHtml(STATE.name ? STATE.name.split(" ")[0] : "+91 " + maskedPhone());
+        return `
+          <section class="app">
+            <div class="wrap app-grid">
+              ${appAside(0)}
+              <div>
+                ${mainHead("Before you start", `Hi ${who}, let's set up your loan application`,
+                  `Signed in as <strong>${escapeHtml(STATE.name || "+91 " + maskedPhone())}</strong>. One consent covers everything we need for your application.`)}
+                <div class="form-card">
+                  <h3 class="form-title">Required to assess your loan</h3>
+                  <p class="form-sub">Steps 1 and 2 ask for these, and nothing else.</p>
+                  <div class="data-groups">
+                    <div class="data-group">
+                      <span class="g-ico">${icon("wallet", "", 17)}</span>
+                      <h4>Your loan</h4>
+                      <ul><li>Loan amount</li><li>Monthly income</li><li>Salary date</li><li>Loan purpose</li><li>Tenure</li></ul>
+                    </div>
+                    <div class="data-group">
+                      <span class="g-ico">${icon("pin", "", 17)}</span>
+                      <h4>Contact &amp; address</h4>
+                      <ul><li>Email</li><li>Residence address</li><li>State and city</li><li>PIN code</li></ul>
+                    </div>
+                    <div class="data-group">
+                      <span class="g-ico">${icon("building", "", 17)}</span>
+                      <h4>Employment</h4>
+                      <ul><li>Employment type</li><li>Company name</li><li>Office address</li></ul>
+                    </div>
+                  </div>
+                  <div class="choice-band">
+                    <span class="r-ico" style="width: 36px; height: 36px; border-radius: 10px; background: white; border: 1px solid var(--border); color: var(--blue); display: flex; align-items: center; justify-content: center;">${icon("sliders", "", 17)}</span>
+                    <span>
+                      <div class="t">Your choice</div>
+                      <div class="d">Offers by email · Loan protection offers from insurance partners</div>
+                    </span>
+                    <span class="pill opt">Optional</span>
+                  </div>
+                  <div class="form-actions" style="border-top: none; padding-top: 0;">
+                    <span class="note">${icon("lock", "", 13)} You can change optional choices any time.</span>
+                    <button class="btn" onclick="showConsentModal('application')">Review &amp; Give Consent ${icon("arrow", "", 16)}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>`;
+      },
+
+      // Step 1 of 3, after the reference "Tell us about yourself" screens.
+      details() {
+        const cities = STATE.form.state ? (STATES[STATE.form.state] || []) : [];
+        return `
+          <section class="app">
+            <div class="wrap app-grid">
+              ${appAside(1)}
+              <div>
+                ${mainHead("Step 1 of 3", "Tell us about yourself", "Help us understand your financial profile to curate the best offers.")}
+                <div class="form-card">
+                  <div class="fsection">
+                    <div class="fsection-head"><span class="f-ico">${icon("wallet", "", 17)}</span><span><div class="section-title">Financial Details</div><div class="section-sub">Used to work out how much you can borrow</div></span></div>
+                    <div class="fgrid">
+                      ${field("loanAmount", "Loan Amount", "rupee", { money: true, inputmode: "numeric", placeholder: "50,000" })}
+                      ${field("income", "Monthly Income", "wallet", { money: true, inputmode: "numeric", placeholder: "25,000" })}
+                      ${field("salaryDate", "Salary Date", "calendar", { digits: true, inputmode: "numeric", maxlength: 2, placeholder: "Day of month, e.g. 10" })}
+                      <div class="fcell">${selectField("purpose", "Loan purpose", "list", PRODUCT.loanPurposes, { placeholder: "Select loan purpose" })}</div>
+                    </div>
+                  </div>
+
+                  <div class="fsection">
+                    <div class="fsection-head"><span class="f-ico">${icon("mail", "", 17)}</span><span><div class="section-title">Contact Info</div><div class="section-sub">Where we send your agreement and updates</div></span></div>
+                    <div class="fgrid">
+                      ${field("email", "Email Address", "mail", { type: "email", placeholder: "name@example.com" })}
+                      ${field("pin", "PIN code", "hash", { digits: true, inputmode: "numeric", maxlength: 6, placeholder: "400001" })}
+                      ${field("address", "Current Residence Address", "pin", { placeholder: "House No, Street, City", wide: true })}
+                      <div class="fcell">${selectField("state", "State", "map", Object.keys(STATES), { placeholder: "Select state", onchange: "setStateField" })}</div>
+                      <div class="fcell" id="city-slot">
+                        ${selectField("city", "City", "building", cities, { placeholder: "Select city", disabled: !STATE.form.state })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="fsection">
+                    <div class="fsection-head"><span class="f-ico">${icon("building", "", 17)}</span><span><div class="section-title">Employment</div><div class="section-sub">How you earn</div></span></div>
+                    <span class="field-label">Employment Type</span>
+                    <div class="choice-row" id="w-employment">
+                      <button type="button" class="choice ${STATE.form.employment === "salaried" ? "selected" : ""}" onclick="setEmployment('salaried')">
+                        <span class="choice-ico">${icon("badge", "", 18)}</span> Salaried
+                      </button>
+                      <button type="button" class="choice ${STATE.form.employment === "self" ? "selected" : ""}" onclick="setEmployment('self')">
+                        <span class="choice-ico">${icon("store", "", 18)}</span> Self Employed
+                      </button>
+                    </div>
+                    <div class="field-error" id="err-employment"></div>
+                    <div class="fgrid">
+                      ${field("company", "Company / Business Name", "building", { placeholder: "Enter name" })}
+                      ${field("officeAddress", "Office Address", "building", { placeholder: "Area, City" })}
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <span class="note">${icon("lock", "", 13)} Used only for the purposes you consented to.</span>
+                    <button class="btn" onclick="submitDetails()">Continue ${icon("arrow", "", 16)}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>`;
+      },
+
+      // Step 2 of 3: the checks the loan-application consent allowed, then the offer.
+      offer() {
+        const o = STATE.offer;
+        const requested = Number(STATE.form.loanAmount) || 0;
+        return `
+          <section class="app">
+            <div class="wrap app-grid">
+              ${appAside(2)}
+              <div>
+                ${mainHead("Step 2 of 3", "Eligibility &amp; Offer", "")}
+                <div class="form-card center" id="checks" style="${STATE.offerReady ? "display: none;" : ""}">
+                  <h3 class="form-title">Checking your eligibility</h3>
+                  <p class="form-sub">Using the details you shared, as you consented.</p>
+                  <div class="check-list" style="text-align: left;">
+                    ${["Assessing income &amp; employment", "Verifying contact &amp; address", "Preparing your offer"].map((label, i) => `
+                      <div class="check-step">
+                        <div class="check-ind ${i === 0 ? "spinning" : ""}" id="check-${i}"></div>
+                        <div class="check-label">${label}</div>
+                      </div>`).join("")}
+                  </div>
+                </div>
+                <div id="offer-body" style="${STATE.offerReady ? "" : "display: none;"}">
+                  <div class="offer-grid">
+                    <div class="form-card">
+                      <div class="offer-hero">
+                        <div class="lbl">You're eligible for</div>
+                        <div class="amt">${NbfcBrand.formatInr(o.amount)}</div>
+                        <div class="note">${o.amount < requested
+                          ? "Based on your income (you asked for " + NbfcBrand.formatInr(requested) + ")"
+                          : "Pre-approved at " + PRODUCT.interestRate + "% p.a."}</div>
+                      </div>
+                      <span class="field-label">Choose tenure</span>
+                      <div class="chips" id="offer-tenure">
+                        ${PRODUCT.tenureOptions.map(n => `<button class="chip ${n === o.tenure ? "selected" : ""}" onclick="setTenure(${n})">${n} months</button>`).join("")}
+                      </div>
+                      <div class="rows" id="offer-rows">${offerRows()}</div>
+                    </div>
+                    <div class="form-card" style="display: flex; flex-direction: column;">
+                      ${PRODUCT.insurancePlans.length ? `
+                        <h3 class="form-title">Loan protection</h3>
+                        <p class="form-sub">Optional. Covers your EMIs if the unexpected happens.</p>
+                        <div id="plans">${planCards()}</div>` : `
+                        <h3 class="form-title">Ready to apply</h3>
+                        <p class="form-sub">Review your offer, then apply.</p>`}
+                      <button class="btn btn-block" style="margin-top: auto;" onclick="acceptOffer()">Accept Offer &amp; Apply</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>`;
+      },
+
+      // Step 3 of 3: application submitted.
+      applied() {
+        const o = STATE.offer;
+        const plan = o.plan >= 0 ? PRODUCT.insurancePlans[o.plan] : null;
+        return `
+          <section class="app">
+            <div class="wrap app-grid">
+              ${appAside(3)}
+              <div>
+                ${mainHead("Step 3 of 3", "Application Submitted", "")}
+                <div class="applied-grid">
+                  <div class="form-card">
+                    <div class="success-head">
+                      <div class="success-tick">${icon("check", "", 28)}</div>
+                      <div>
+                        <h3 class="form-title">Loan application submitted!</h3>
+                        <div class="app-no">Application No. ${escapeHtml(STATE.applicationId)}</div>
+                      </div>
+                    </div>
+                    <div class="rows">
+                      <div class="row"><span>Loan amount</span><span>${NbfcBrand.formatInr(o.amount)}</span></div>
+                      <div class="row"><span>Tenure</span><span>${o.tenure} months</span></div>
+                      <div class="row"><span>Monthly EMI</span><span>${NbfcBrand.formatInr(NbfcBrand.emiFor(o.amount, o.tenure))}</span></div>
+                      <div class="row"><span>Protection plan</span><span>${plan ? escapeHtml(plan.name) : "None"}</span></div>
+                      <div class="row"><span>Amount credited</span><span>${NbfcBrand.formatInr(o.amount - processingFee(o.amount))}</span></div>
+                    </div>
+                    <div class="card-title" style="margin-top: 20px;">What happens next</div>
+                    <ol class="next-list">
+                      <li><span class="n">1</span> E-sign your loan agreement</li>
+                      <li><span class="n">2</span> Set up eNACH auto-pay</li>
+                      <li><span class="n">3</span> Funds arrive in ${escapeHtml(PRODUCT.payoutTime)}</li>
+                    </ol>
+                    <button class="btn btn-block" onclick="goTo('artifacts')">${icon("download", "", 16)} Download Consent Certificates</button>
+                    <div class="center" style="margin-top: 10px;"><button class="link-sm" onclick="restart()">Start a new application</button></div>
+                  </div>
+                  <div class="form-card">
+                    <h3 class="form-title">Your data rights</h3>
+                    <p class="form-sub">Each opens our consent portal in a new tab.</p>
+                    ${rightsGrid()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>`;
+      },
+
+      artifacts() {
+        return `
+          <section class="app">
+            <div class="wrap">
+              ${mainHead("", "Consent Certificates", "Loading your certificates…")}
+            </div>
+          </section>`;
+      }
+    };
+
+    // ====== Navigation ======
+    function goTo(screenId) {
+      const el = document.getElementById("screen");
+      if (STATE.resendTimer) {
+        clearInterval(STATE.resendTimer);
+        STATE.resendTimer = null;
+      }
+
+      // Phase 1: Fade out + slide (no transition yet)
+      el.style.transition = "none";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(10px)";
+
+      setTimeout(() => {
+        // Phase 2: Inject new content
+        STATE.currentScreen = screenId;
+        if (SCREENS[screenId]) {
+          el.innerHTML = SCREENS[screenId]();
+        }
+        window.scrollTo({ top: 0, behavior: "instant" });
+
+        // Phase 3: Enable transition, animate in
+        el.style.transition = "opacity 0.25s ease-out, transform 0.25s ease-out";
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0)";
+
+        // Phase 4: Remove transition after animation (a transform would pin the sticky aside)
+        setTimeout(() => {
+          el.style.transition = "none";
+          el.style.transform = "";
+        }, 300);
+
+        renderJBar();
+        updateChrome();
+        postRender(screenId);
+      }, 150);
+    }
+
+    // Home page, optionally scrolled to one of its sections (header nav and footer links).
+    function goHome(sectionId) {
+      const scroll = () => {
+        const target = sectionId && document.getElementById(sectionId);
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      };
+      if (STATE.currentScreen === "welcome") {
+        scroll();
+        return;
+      }
+      if (STATE.authToken) return; // signed in: the home page would drop the application
+      goTo("welcome");
+      setTimeout(scroll, 250);
+    }
+
+    // Header, sub bar and title: index.html's app bar for a website.
+    function updateChrome() {
+      const brandName = NbfcBrand.get().shortName;
+      const titles = {
+        welcome: brandName,
+        mobile: "Sign in",
+        otp: "Verify OTP",
+        application: "Loan Application",
+        details: "Personal Details",
+        offer: "Your Loan Offer",
+        applied: "Application Submitted",
+        artifacts: "Consent Certificates"
+      };
+      const screen = STATE.currentScreen;
+      document.getElementById("page-title").textContent = titles[screen] || brandName;
+      document.getElementById("back-btn").classList.toggle("visible", Boolean(BACK[screen]));
+      document.getElementById("subbar").classList.toggle("hidden", screen === "welcome");
+
+      document.getElementById("nav").innerHTML = STATE.authToken ? "" : `
+        <a href="#how" onclick="goHome('how'); return false;">How it works</a>
+        <a href="#rates" onclick="goHome('rates'); return false;">Rates &amp; fees</a>
+        <a href="#privacy" onclick="goHome('privacy'); return false;">Your privacy</a>
+        <a href="#" onclick="openRights('grievance'); return false;">Help</a>`;
+
+      const right = document.getElementById("header-right");
+      if (STATE.authToken) {
+        const name = STATE.name || "+91 " + maskedPhone();
+        right.innerHTML = `
+          <div class="user-chip">
+            <span class="account-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</span>
+            <span><div class="u-name">${escapeHtml(name)}</div><div class="u-sub">Signed in</div></span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="restart()">Sign out</button>`;
+      } else if (screen === "welcome") {
+        right.innerHTML = `
+          <button class="link-sm" onclick="openRights('notice')">Privacy Policy</button>
+          <button class="btn btn-sm" onclick="showConsentModal('signin')">Get Started</button>`;
+      } else {
+        right.innerHTML = `<button class="link-sm" onclick="openRights('notice')">Privacy Policy</button>`;
+      }
+    }
+
+    function postRender(screenId) {
+      if (screenId === "otp") {
+        initOTPInputs();
+        startResendCountdown();
+        setTimeout(() => {
+          const firstInput = document.querySelector(".otp-digit");
+          if (firstInput) firstInput.focus();
+        }, 50);
+      }
+
+      if (screenId === "offer" && !STATE.offerReady) {
+        startEligibilityChecks();
+      }
+
+      if (screenId === "artifacts" && !STATE.artifacts) {
+        // Auto-fetch on first entry only. goToArtifactSelection() sets
+        // STATE.artifacts and re-enters this screen to render the list —
+        // without this guard the flow re-fetches and re-renders forever.
+        setTimeout(() => {
+          downloadCertificate();
+        }, 300);
+      }
+    }
+
+    function renderJBar() {
+      const current = MILESTONE_OF[STATE.currentScreen];
+      document.getElementById("jbar").innerHTML = MILESTONES.map((label, i) => {
+        const done = i < current;
+        const active = i === current;
+        return `
+          ${i > 0 ? '<span class="jsep"></span>' : ""}
+          <div class="jstep ${done ? "done" : ""} ${active ? "active" : ""}">
+            <div class="jdot">${done ? icon("check", "", 11) : i + 1}</div>
+            <div class="jlbl">${label}</div>
+          </div>`;
+      }).join("");
+    }
+
+    // ====== Home page EMI calculator ======
+    // The amount carries into Step 1's Loan Amount, the tenure into Step 2.
+    function calcOut() {
+      const amount = Number(STATE.form.loanAmount) || PRODUCT.amount;
+      const emi = NbfcBrand.emiFor(amount, STATE.tenure);
+      return `
+        <div><div class="k">Monthly EMI</div><div class="v">${NbfcBrand.formatInr(emi)}</div></div>
+        <div><div class="k">Total interest</div><div class="v">${NbfcBrand.formatInr(Math.max(0, emi * STATE.tenure - amount))}</div></div>`;
+    }
+
+    function setCalcAmount(value) {
+      STATE.form.loanAmount = String(Number(value));
+      document.getElementById("calc-amt").textContent = NbfcBrand.formatInr(Number(value));
+      document.getElementById("calc-out").innerHTML = calcOut();
+    }
+
+    function setCalcTenure(n) {
+      STATE.tenure = n;
+      document.querySelectorAll("#calc-tenure .chip").forEach(el => el.classList.toggle("selected", el.textContent === n + " months"));
+      document.getElementById("calc-out").innerHTML = calcOut();
+    }
+
+    // ====== Sign in ======
+    function selectAccount(idx) {
+      STATE.phone = DEMO_ACCOUNTS[idx].phone;
+      STATE.name = DEMO_ACCOUNTS[idx].name;
+      const input = document.getElementById("phone-input");
+      if (input) input.value = STATE.phone;
+      document.querySelectorAll(".account-pill").forEach((el, i) => el.classList.toggle("selected", i === idx));
+      showPhoneError("");
+    }
+
+    function onPhoneInput(input) {
+      input.value = input.value.replace(/\D/g, "").slice(0, 10);
+      STATE.phone = input.value;
+      const match = DEMO_ACCOUNTS.find(acc => acc.phone === STATE.phone);
+      STATE.name = match ? match.name : "";
+      document.querySelectorAll(".account-pill").forEach((el, i) => el.classList.toggle("selected", DEMO_ACCOUNTS[i].phone === STATE.phone));
+      showPhoneError("");
+    }
+
+    function showPhoneError(message) {
+      const err = document.getElementById("phone-error");
+      if (err) err.textContent = message;
+      const wrap = document.getElementById("phone-wrap");
+      if (wrap) wrap.classList.toggle("invalid", Boolean(message));
+    }
+
+    function startOtpFlow() {
+      if (!/^[6-9]\d{9}$/.test(STATE.phone)) {
+        showPhoneError("Enter a valid 10-digit mobile number, or choose a demo customer.");
+        return;
+      }
+      // Consent 1 was captured anonymously on the welcome screen (sessionId in
+      // localStorage); verifyOTP binds it to the principal with /consent/pending/link.
+      sendOTP(false);
+    }
+
+    async function sendOTP(isResend) {
+      const button = document.getElementById(isResend ? "resend-btn" : "get-otp");
+      if (button) button.disabled = true;
+      try {
+        const response = await fetch(API_BASE + "/auth/otp/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orgId: ORG_ID, phone: "+91" + STATE.phone })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!data.success) {
+          const message = data.error || "Couldn't send the code. Please try again.";
+          if (isResend) showOtpError(message); else showPhoneError(message);
+          if (button) button.disabled = false;
+          return;
+        }
+        STATE.otpRequestId = data.data.requestId;
+        if (isResend) {
+          showOtpError("");
+          startResendCountdown();
+        } else {
+          goTo("otp");
+        }
+      } catch (err) {
+        const message = "Couldn't reach the server: " + err.message;
+        if (isResend) showOtpError(message); else showPhoneError(message);
+        if (button) button.disabled = false;
+      }
+    }
+
+    function resendOTP() {
+      sendOTP(true);
+    }
+
+    function startResendCountdown() {
+      let left = 30;
+      const timer = document.getElementById("resend-timer");
+      const button = document.getElementById("resend-btn");
+      if (button) button.disabled = true;
+      if (STATE.resendTimer) clearInterval(STATE.resendTimer);
+      const tick = () => {
+        if (timer) timer.textContent = "0:" + String(left).padStart(2, "0");
+        if (left <= 0) {
+          clearInterval(STATE.resendTimer);
+          STATE.resendTimer = null;
+          if (button) button.disabled = false;
+        }
+        left -= 1;
+      };
+      tick();
+      STATE.resendTimer = setInterval(tick, 1000);
+    }
+
+    function initOTPInputs() {
+      const inputs = document.querySelectorAll(".otp-digit");
+      inputs.forEach((input, idx) => {
+        input.addEventListener("input", (e) => {
+          e.target.value = e.target.value.replace(/\D/g, "").slice(-1);
+          if (e.target.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+          if (Array.from(inputs).every(i => i.value)) verifyOTP();
+        });
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !e.target.value && idx > 0) inputs[idx - 1].focus();
+          if (e.key === "Enter") verifyOTP();
+        });
+        input.addEventListener("paste", (e) => {
+          const digits = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+          if (!digits) return;
+          e.preventDefault();
+          digits.split("").forEach((d, i) => { if (inputs[i]) inputs[i].value = d; });
+          (inputs[digits.length] || inputs[inputs.length - 1]).focus();
+          if (digits.length === 6) verifyOTP();
+        });
+      });
+    }
+
+    function showOtpError(message) {
+      const err = document.getElementById("otp-error");
+      if (err) err.textContent = message;
+    }
+
+    async function verifyOTP() {
+      const inputs = document.querySelectorAll(".otp-digit");
+      const otp = Array.from(inputs).map(i => i.value).join("");
+      if (otp.length !== 6) {
+        showOtpError("Enter all 6 digits.");
+        return;
+      }
+      const button = document.getElementById("verify-btn");
+      if (button) {
+        if (button.disabled) return;
+        button.disabled = true;
+      }
+      showOtpError("");
+
+      try {
+        const response = await fetch(API_BASE + "/auth/otp/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestId: STATE.otpRequestId, otp })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!data.success) {
+          // The API answers an unknown number with a fake "sent", so a code
+          // that fails here may be a wrong code OR a number that is not a data
+          // principal of this organisation; say both.
+          showOtpError("That code didn't work. Use 123456 with one of the demo customers.");
+          inputs.forEach(i => { i.value = ""; });
+          inputs[0].focus();
+          if (button) button.disabled = false;
+          return;
+        }
+
+        STATE.authToken = data.data.token;
+        STATE.principalId = data.data.principalId;
+        if (!STATE.name && data.data.name) STATE.name = data.data.name;
+
+        // Bind the pre-OTP anonymous registration consent (stored against a
+        // session id by consent screen 1) to the freshly authenticated
+        // principal, then the cookie banner's anonymous choices.
+        await linkPendingConsent();
+        await linkCookieBannerSession();
+
+        goTo("application");
+      } catch (err) {
+        showOtpError("Couldn't reach the server: " + err.message);
+        if (button) button.disabled = false;
+      }
+    }
+
+    // Open a consent-ui page (privacy notice, DSAR, preferences, grievance,
+    // nominee, pwd-guardian, breaches) in a new tab. The pages ask for an OTP
+    // sign-in of their own when they need one.
+    function openRights(slug) {
+      const url = new URL(CONSENT_UI + "/" + ORG_ID + "/" + slug);
+      // Cross-origin bridge: <es-cookie-banner> writes its anonymous session id
+      // to THIS page's origin, invisible to consent-ui's own localStorage.
+      // Forward it so consent-ui can offer to link the pre-login cookie choices.
+      const cookieSessionId = window.__cookieBannerSessionId;
+      if (typeof cookieSessionId === "string" && cookieSessionId.length > 0 && cookieSessionId.length <= 128) {
+        url.searchParams.set("cookie_session", cookieSessionId);
+      }
+      window.open(url.toString(), "_blank", "noopener");
+    }
+
+    // Re-audit M-14 (2026-09-15) — the host's OWN sign-in must also bind the
+    // cookie banner's anonymous choices, or they stay orphaned under the anon
+    // id (invisible to My Cookies, DSAR access and erasure). The banner wrote
+    // this id to THIS page's own localStorage, so linking it here is a
+    // first-party action.
+    async function linkCookieBannerSession() {
+      const storageKey = "cmp_cookie_session_" + ORG_ID;
+      let sessionId = null;
+      try { sessionId = localStorage.getItem(storageKey); } catch { /* ignore */ }
+      if (!sessionId) return;
+      try {
+        const res = await fetch(API_BASE + "/consent/cookies/link-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + STATE.authToken
+          },
+          body: JSON.stringify({ orgId: ORG_ID, sessionId })
+        });
+        if (!res.ok) console.warn("Cookie-session link failed:", res.status);
+      } catch (err) {
+        console.warn("Cookie-session link error:", err);
+      }
+    }
+
+    async function linkPendingConsent() {
+      const storageKey = "cmp_pending_session_" + ORG_ID;
+      let sessionId = null;
+      try { sessionId = localStorage.getItem(storageKey); } catch { /* ignore */ }
+      if (!sessionId) return;
+
+      try {
+        const res = await fetch(API_BASE + "/consent/pending/link", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + STATE.authToken
+          },
+          body: JSON.stringify({ orgId: ORG_ID, sessionId })
+        });
+        if (!res.ok) {
+          console.warn("Pending-consent link failed:", res.status);
+          return;
+        }
+        try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
+      } catch (err) {
+        console.warn("Pending-consent link error:", err);
+      }
+    }
+
+    // ====== Consent screens ======
+    function showConsentModal(profileCode) {
+      // The two consent screens of this journey (created on staging for it);
+      // config/env.js PROFILE_CODES overrides them per environment.
+      //   signin:      before the mobile number (OTP, updates, mobile offers)
+      //   application: before Step 1 (the details Steps 1-2 collect, optional offers)
+      const profileMap = Object.assign({
+        signin: "nbfc-sign-in-consent",
+        application: "nbfc-application-consent"
+      }, __CFG.PROFILE_CODES || {});
+
+      const code = profileMap[profileCode] || profileCode;
+
+      if (!customElements.get("es-consent-modal")) {
+        alert("Consent screen not available yet. Check your connection and try again.");
+        return;
+      }
+
+      let modal = document.querySelector("es-consent-modal");
+      if (!modal) {
+        modal = document.createElement("es-consent-modal");
+        document.body.appendChild(modal);
+        setupConsentModalListeners(modal);
+      }
+
+      modal.setAttribute("org-id", ORG_ID);
+      modal.setAttribute("api-base", API_BASE);
+      modal.setAttribute("consent-ui-base", CONSENT_UI);
+      modal.setAttribute("profile-code", code);
+
+      // WHY: consent-ui stores a token it is handed in its own browser storage
+      // and restores it on every later open (up to the token's 24h life). After
+      // one signed-in step, the NEXT run's first consent would record straight
+      // against the previous person via /consent/grant, never as a pending
+      // consent, and revoking the token does not stop it.
+      // DECISION: never hand the pop-up the principal token. Every consent records
+      // through the anonymous rail (/consent/pending/grant) and the granted /
+      // rejected handlers bind it to the signed-in principal with
+      // /consent/pending/link, so it shows under Pending, then Linked.
+      // TRADEOFF: the after-sign-in consent screen shows "not signed in" and the
+      // 18+ self-declaration, like the first one.
+      modal.removeAttribute("auth-token");
+      modal.removeAttribute("principal-id");
+
+      setTimeout(() => {
+        modal.open = true;
+        modal.show().catch(err => alert("Error: " + err.message));
+      }, 100);
+    }
+
+    function setupConsentModalListeners(modal) {
+      // Principal accepted → advance (NEXT_SCREEN).
+      modal.addEventListener("granted", async (event) => {
+        // SDK forwards the anonymous-capture sessionId from the iframe's
+        // postMessage payload; cross-origin localStorage is invisible to the
+        // host, so the SDK callback is the only bridge. Persist it so
+        // linkPendingConsent() finds it.
+        const sessionId = event.detail?.sessionId;
+        if (typeof sessionId === "string" && sessionId.length > 0 && sessionId.length <= 128) {
+          try {
+            localStorage.setItem("cmp_pending_session_" + ORG_ID, sessionId);
+          } catch (err) {
+            // LS quota / private browsing / blocked storage: the pending row
+            // stays unbound, so make it debuggable.
+            console.warn("[cmp] failed to persist pending sessionId:", err);
+          }
+        }
+        // Signed in already (consent screen 2): bind it now. Before sign-in
+        // (consent screen 1) verifyOTP binds it after the code.
+        if (STATE.authToken) {
+          try { await linkPendingConsent(); } catch (err) { console.warn(err); }
+        }
+        const nextScreenId = NEXT_SCREEN[STATE.currentScreen];
+        if (nextScreenId) setTimeout(() => goTo(nextScreenId), 300);
+      });
+
+      // Principal rejected → hold if required purposes were refused (DPDP S.6/S.7:
+      // a refusal cannot unlock the next step), else advance as on grant.
+      modal.addEventListener("rejected", async (event) => {
+        if (event.detail?.hadMandatory) {
+          setTimeout(() => {
+            alert(
+              "To continue, we need your consent for the processing marked " +
+              "as required. You can review and grant it by clicking the " +
+              "button again, or exit the flow."
+            );
+          }, 300);
+          return;
+        }
+        if (STATE.authToken) {
+          try { await linkPendingConsent(); } catch (err) { console.warn(err); }
+        }
+        const nextScreenId = NEXT_SCREEN[STATE.currentScreen];
+        if (nextScreenId) setTimeout(() => goTo(nextScreenId), 300);
+      });
+
+      modal.addEventListener("error", (event) => {
+        alert("Error: " + (event.detail?.message || "Unknown error"));
+      });
+    }
+
+    // ====== Step 1: details ======
+    function setField(key, el) {
+      STATE.form[key] = el.value.trim();
+      clearError(key);
+    }
+
+    function setDigits(key, el) {
+      el.value = el.value.replace(/\D/g, "");
+      STATE.form[key] = el.value;
+      clearError(key);
+    }
+
+    function setMoney(key, el) {
+      const digits = el.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 9);
+      STATE.form[key] = digits;
+      el.value = digits ? Number(digits).toLocaleString("en-IN") : "";
+      clearError(key);
+      if (key === "loanAmount") updateEstimate();
+    }
+
+    function setStateField(key, el) {
+      STATE.form.state = el.value;
+      STATE.form.city = "";
+      clearError("state");
+      const cities = STATES[el.value] || [];
+      document.getElementById("city-slot").innerHTML =
+        selectField("city", "City", "building", cities, { placeholder: "Select city", disabled: !el.value });
+    }
+
+    function setEmployment(type) {
+      STATE.form.employment = type;
+      document.querySelectorAll("#w-employment .choice").forEach((el, i) =>
+        el.classList.toggle("selected", (i === 0 ? "salaried" : "self") === type));
+      clearError("employment");
+    }
+
+    function clearError(key) {
+      const err = document.getElementById("err-" + key);
+      if (err) err.textContent = "";
+      const wrap = document.getElementById("w-" + key);
+      if (wrap) wrap.classList.remove("invalid");
+    }
+
+    function validateDetails() {
+      const f = STATE.form;
+      const errors = {};
+      const amount = Number(f.loanAmount);
+      if (!amount) errors.loanAmount = "Enter the loan amount.";
+      else if (amount < PRODUCT.minAmount || amount > PRODUCT.maxAmount) {
+        errors.loanAmount = "Choose between " + NbfcBrand.formatInr(PRODUCT.minAmount) +
+          " and " + NbfcBrand.formatInr(PRODUCT.maxAmount) + ".";
+      }
+      if (!Number(f.income)) errors.income = "Enter your monthly income.";
+      const day = Number(f.salaryDate);
+      if (!(day >= 1 && day <= 31)) errors.salaryDate = "Enter a day between 1 and 31.";
+      if (!f.purpose) errors.purpose = "Select a loan purpose.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email)) errors.email = "Enter a valid email address.";
+      if (f.address.length < 5) errors.address = "Enter your current address.";
+      if (!f.state) errors.state = "Select your state.";
+      if (!f.city) errors.city = "Select your city.";
+      if (!/^[1-9]\d{5}$/.test(f.pin)) errors.pin = "Enter a valid 6-digit PIN code.";
+      if (!f.employment) errors.employment = "Choose your employment type.";
+      if (f.company.length < 2) errors.company = "Enter your company or business name.";
+      if (f.officeAddress.length < 3) errors.officeAddress = "Enter your office address.";
+      return errors;
+    }
+
+    function submitDetails() {
+      const errors = validateDetails();
+      Object.keys(STATE.form).forEach(clearError);
+      const keys = Object.keys(errors);
+      keys.forEach(key => {
+        const err = document.getElementById("err-" + key);
+        if (err) err.textContent = errors[key];
+        const wrap = document.getElementById("w-" + key);
+        if (wrap) wrap.classList.add("invalid");
+      });
+      if (keys.length > 0) {
+        const first = document.getElementById("w-" + keys[0]);
+        if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      STATE.offer = buildOffer();
+      STATE.offerReady = false;
+      goTo("offer");
+    }
+
+    // ====== Step 2: offer ======
+    // Demo eligibility: the requested amount, capped by income x incomeMultiple
+    // and the product maximum, rounded down to the slider step. The tenure is the
+    // one picked on the home page's calculator.
+    function buildOffer() {
+      const requested = Number(STATE.form.loanAmount);
+      const cap = Math.min(requested, Number(STATE.form.income) * PRODUCT.incomeMultiple, PRODUCT.maxAmount);
+      const step = PRODUCT.amountStep;
+      const amount = Math.max(PRODUCT.minAmount, Math.floor(cap / step) * step);
+      const tenure = PRODUCT.tenureOptions.includes(STATE.tenure) ? STATE.tenure : defaultTenure();
+      return { amount, tenure, plan: -1 };
+    }
+
+    function processingFee(amount) {
+      return Math.round(amount * PRODUCT.processingFeePercent / 100);
+    }
+
+    function offerRows() {
+      const o = STATE.offer;
+      return `
+        <div class="row"><span>Interest rate</span><span>${PRODUCT.interestRate}% p.a.</span></div>
+        <div class="row"><span>Monthly EMI</span><span>${NbfcBrand.formatInr(NbfcBrand.emiFor(o.amount, o.tenure))}</span></div>
+        <div class="row"><span>Processing fee (${PRODUCT.processingFeePercent}%)</span><span>${NbfcBrand.formatInr(processingFee(o.amount))}</span></div>
+        <div class="row"><span>Amount credited</span><span>${NbfcBrand.formatInr(o.amount - processingFee(o.amount))}</span></div>`;
+    }
+
+    function planCards() {
+      const o = STATE.offer;
+      const card = (idx, name, desc) => `
+        <div class="plan ${o.plan === idx ? "selected" : ""}" onclick="setPlan(${idx})">
+          <span class="radio"></span>
+          <span><div class="plan-name">${escapeHtml(name)}</div><div class="plan-desc">${escapeHtml(desc)}</div></span>
+        </div>`;
+      return card(-1, "No protection", "Continue without a plan") +
+        PRODUCT.insurancePlans.map((p, i) =>
+          card(i, p.name + " · " + NbfcBrand.formatInr(p.monthlyPrice) + "/month", p.features.join(", "))).join("");
+    }
+
+    function setTenure(n) {
+      STATE.offer.tenure = n;
+      STATE.tenure = n;
+      document.querySelectorAll("#offer-tenure .chip").forEach(el => el.classList.toggle("selected", el.textContent === n + " months"));
+      document.getElementById("offer-rows").innerHTML = offerRows();
+      const emi = document.getElementById("est-emi");
+      if (emi) emi.firstChild.textContent = NbfcBrand.formatInr(NbfcBrand.emiFor(STATE.offer.amount, n));
+      const sub = document.getElementById("est-sub");
+      if (sub) sub.textContent = NbfcBrand.formatInr(STATE.offer.amount) + " over " + n + " months at " + PRODUCT.interestRate + "% p.a.";
+    }
+
+    function setPlan(idx) {
+      STATE.offer.plan = idx;
+      document.getElementById("plans").innerHTML = planCards();
+    }
+
+    function startEligibilityChecks() {
+      [0, 1, 2].forEach(i => {
+        setTimeout(() => {
+          const ind = document.getElementById("check-" + i);
+          if (ind) {
+            ind.classList.remove("spinning");
+            ind.classList.add("done");
+            ind.innerHTML = icon("check", "", 14);
+          }
+          const next = document.getElementById("check-" + (i + 1));
+          if (next) next.classList.add("spinning");
+        }, 900 * (i + 1));
+      });
+      setTimeout(() => {
+        if (STATE.currentScreen !== "offer") return;
+        STATE.offerReady = true;
+        document.getElementById("checks").style.display = "none";
+        document.getElementById("offer-body").style.display = "";
+      }, 3000);
+    }
+
+    function acceptOffer() {
+      STATE.applicationId = NbfcBrand.get().shortName.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase() +
+        new Date().toISOString().slice(2, 10).replace(/-/g, "") +
+        String(Math.floor(1000 + Math.random() * 9000));
+      goTo("applied");
+    }
+
+    // ====== Consent certificates ======
+    async function downloadCertificate() {
+      if (!STATE.principalId || !STATE.authToken) {
+        alert("Please sign in first");
+        goTo("applied");
+        return;
+      }
+
+      try {
+        // Fetch consents for this principal - each consent has an artifact
+        const response = await fetch(
+          `${API_BASE}/consent/${STATE.principalId}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${STATE.authToken}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        const data = await response.json();
+        if (!data.success) {
+          alert("Error fetching certificates: " + (data.error || "Unknown error"));
+          goTo("applied");
+          return;
+        }
+
+        const consents = (data.data?.consents || []).filter(c => c.status === "granted");
+        if (consents.length === 0) {
+          alert("No granted consents yet.");
+          goTo("applied");
+          return;
+        }
+
+        goToArtifactSelection(consents.map(c => ({
+          id: c.consentId,
+          name: `${c.purposeName || c.purposeCode} - Consent Artifact`,
+          created_at: c.grantedAt,
+          type: "HTML"
+        })));
+      } catch (err) {
+        alert("Error: " + err.message);
+        goTo("applied");
+      }
+    }
+
+    async function downloadArtifact(idx) {
+      const artifact = STATE.artifacts[idx];
+      const fileName = artifact.name + ".html";
+      try {
+        const response = await fetch(`${API_BASE}/consent/artifact/${artifact.id}/download`, {
+          headers: { "Authorization": `Bearer ${STATE.authToken}` }
+        });
+        if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (err) {
+        alert("Download error: " + err.message);
+      }
+    }
+
+    function goToArtifactSelection(artifacts) {
+      STATE.artifacts = artifacts;
+      SCREENS.artifacts = function () {
+        return `
+          <section class="app">
+            <div class="wrap">
+              ${mainHead("Application No. " + escapeHtml(STATE.applicationId), "Consent Certificates",
+                "One certificate for every consent you gave. Click a certificate to download it.")}
+              <div class="cert-grid">
+                ${artifacts.map((artifact, idx) => `
+                  <button class="cert" onclick="downloadArtifact(${idx})">
+                    <span class="c-ico">${icon("doc", "", 19)}</span>
+                    <span class="c-name">${escapeHtml(artifact.name)}</span>
+                    <span class="c-date">Granted ${artifact.created_at ? new Date(artifact.created_at).toLocaleDateString() : "—"}</span>
+                    <span class="c-dl">${icon("download", "", 14)} Download</span>
+                  </button>`).join("")}
+              </div>
+              <button class="btn btn-outline" onclick="goTo('applied')">Back to application</button>
+            </div>
+          </section>`;
+      };
+      goTo("artifacts");
+    }
+
+    // ====== Restart ======
+    function restart() {
+      // Revoke the principal session server-side before dropping the token
+      // (migration 411). `keepalive` keeps the request alive while goTo()
+      // re-renders, so the reset is a real sign-out.
+      if (STATE.authToken) {
+        try {
+          fetch(API_BASE + "/auth/principal/logout", {
+            method: "POST",
+            keepalive: true,
+            headers: { "Authorization": "Bearer " + STATE.authToken }
+          }).catch(function () { /* best-effort: local reset proceeds regardless */ });
+        } catch (err) {
+          console.warn("[demo] principal logout failed:", err);
+        }
+      }
+      Object.assign(STATE, {
+        authToken: null, principalId: null, otpRequestId: null, phone: "", name: "",
+        form: emptyForm(), tenure: defaultTenure(), offer: null, offerReady: false, applicationId: null, artifacts: null
+      });
+      delete SCREENS.artifacts;
+      SCREENS.artifacts = SCREENS_ARTIFACTS_PLACEHOLDER;
+      goTo("welcome");
+    }
+
+    const SCREENS_ARTIFACTS_PLACEHOLDER = SCREENS.artifacts;
+
+    // ====== Back / Restart buttons ======
+    document.getElementById("back-btn").addEventListener("click", () => {
+      const prev = BACK[STATE.currentScreen];
+      if (prev) goTo(prev);
+    });
+    document.getElementById("restart-btn").addEventListener("click", restart);
+
+    // ====== Init ======
+    // The org's branding arrives asynchronously; data-brand-* nodes refresh
+    // themselves, the header and title are rebuilt here.
+    document.getElementById("year").textContent = new Date().getFullYear();
+    window.addEventListener("nbfc:brand", updateChrome);
+    goTo("welcome");
+  </script>
+
+  <!-- ====== Cookie consent banner (DPDP S.6 / S.7) ======
+       Drop-in <es-cookie-banner> Web Component, loaded by js/sdk-loader.js in
+       <head>. The banner auto-fetches /public/:orgId/cookies/banner.json and
+       themes from the org's primaryColor, so no per-page CSS. -->
+  <script>
+    (function () {
+      var cfg = window.DEMO_CONFIG || {};
+      var orgId = cfg.ORG_ID || "org-quicklend-001";
+      var apiBase = cfg.API_BASE || "http://localhost:4000/api/v1";
+      var banner = document.createElement("es-cookie-banner");
+      banner.setAttribute("org-id", orgId);
+      banner.setAttribute("api-base", apiBase);
+      // Cross-origin bridge: capture the sessionId for forwarding as the
+      // `cookie_session` query param on the next consent-ui navigation.
+      // consent-ui never auto-links a query-param id; the principal confirms.
+      function captureBannerSessionId(sessionId) {
+        if (typeof sessionId !== "string" || sessionId.length === 0) return;
+        window.__cookieBannerSessionId = sessionId;
+      }
+      banner.addEventListener("granted", function (e) {
+        captureBannerSessionId(e.detail && e.detail.sessionId);
+      });
+      banner.addEventListener("withdrawn", function (e) {
+        captureBannerSessionId(e.detail && e.detail.sessionId);
+      });
+      document.body.appendChild(banner);
+      // Returning visitor whose decision is still fresh: the banner emits only
+      // `ready`, so seed from the SDK's own localStorage write.
+      try {
+        var storedSessionId = window.localStorage.getItem("cmp_cookie_session_" + orgId);
+        if (storedSessionId) captureBannerSessionId(storedSessionId);
+      } catch (e) { /* private browsing / blocked storage */ }
+    })();
+  </script>
+</body>
+</html>

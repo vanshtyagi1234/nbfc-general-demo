@@ -12,6 +12,7 @@ every consent, OTP and data-rights call goes to e-Sahamati.
 | Page | What it shows |
 |---|---|
 | `index.html` | The main demo: a login-first loan application with **two consent screens**. Welcome → consent 1 (`nbfc-sign-in-consent`: the mobile number) → sign in (pick a demo customer, OTP `123456`) → consent 2 (`nbfc-application-consent`: everything Steps 1-2 ask for) → Step 1 of 3 "Tell us about yourself" → Step 2 eligibility checks and loan offer → Step 3 application submitted, with consent certificates and data-rights links |
+| `web.html` | The `index.html` journey as a desktop website: the same screens, the same two consent screens and the same e-Sahamati calls, with a landing page (EMI calculator, how it works, privacy and data-rights sections), a split sign-in page and a sidebar layout for the three steps. `npm run start:web` opens it |
 | `classic.html` | The earlier QuickLend-style journey (age check, notice, sign-up, OTP, KYC, credit bureau, AA, loan, insurance, approval, rights, marketing). `JOURNEY: "combined"` opens two consent screens, `"full"` seven, as on demo.e-sahamati.com |
 | `dpo.html` | The journey on the left with a live DPO compliance monitor on the right (consent ledger, data-rights shortcuts, S.6 checklist) |
 | `cookie-banner-demo.html` | The cookie banner on its own, with tag gating and an event log |
